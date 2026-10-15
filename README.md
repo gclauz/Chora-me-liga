@@ -1,8 +1,8 @@
 # Chora-me-liga  
 
-Comparador de preços: o usuário pesquisa um produto pelo nome ou por foto e vê em quais lojas ele é mais barato, com histórico de preços.
-
 Projeto da disciplina Laboratório de Engenharia de Software, Ciência da Computação, Universidade Presbiteriana Mackenzie. Alinhado ao ODS 12 (consumo e produção responsáveis).
+
+Comparador de preços: o usuário pesquisa um produto pelo nome ou por foto e vê em quais lojas ele é mais barato, com histórico de preços.
 
 ## Equipe
 
