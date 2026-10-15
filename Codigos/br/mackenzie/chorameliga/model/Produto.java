@@ -14,6 +14,7 @@ public class Produto {
     private final String nome;
     private final String categoria;
     private final String descricao;
+    private Long id;
     private final List<Oferta> ofertas = new ArrayList<>();
 
     public Produto(String nome, String categoria, String descricao) {
@@ -32,16 +33,18 @@ public class Produto {
         ofertas.add(oferta);
     }
 
-    public void aplicarPreco(String loja, double preco, double frete, String url) {
+    public boolean aplicarPreco(String loja, double preco, double frete, String url) {
         for (Oferta o : ofertas) {
             if (o.getLoja().equalsIgnoreCase(loja)) {
-                if (o.getPreco() != preco) {
-                    o.atualizarPreco(preco);
+                if (o.getPreco() == preco) {
+                    return false;
                 }
-                return;
+                o.atualizarPreco(preco);
+                return true;
             }
         }
         ofertas.add(new Oferta(loja, preco, frete, url));
+        return true;
     }
 
     // Menor preço considerando o frete (o que o cliente paga de verdade)
@@ -73,5 +76,13 @@ public class Produto {
 
     public List<Oferta> getOfertas() {
         return Collections.unmodifiableList(ofertas);
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 }

@@ -90,4 +90,12 @@ class ProdutoTest {
         assertEquals(1, galaxy.getOfertas().get(0).getHistoricoPrecos().size());
     }
 
+    @Test
+    @DisplayName("Aplicar preço informa se algo mudou")
+    void testAplicarPrecoRetorno() {
+        assertTrue(galaxy.aplicarPreco("Amazon Brasil", 2899.00, 0.00, null));  // criou
+        assertTrue(galaxy.aplicarPreco("Amazon Brasil", 2799.00, 0.00, null));  // mudou
+        assertFalse(galaxy.aplicarPreco("Amazon Brasil", 2799.00, 0.00, null)); // igual
+    }
+
 }
