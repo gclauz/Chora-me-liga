@@ -64,4 +64,30 @@ class ProdutoTest {
         assertThrows(UnsupportedOperationException.class,
                 () -> galaxy.getOfertas().add(amazon));
     }
+
+    @Test
+    @DisplayName("Aplicar preço cria a oferta se a loja é nova")
+    void testAplicarPrecoLojaNova() {
+        galaxy.aplicarPreco("Amazon Brasil", 2899.00, 0.00, "https://amazon.com.br/galaxy");
+
+        assertEquals(1, galaxy.getQuantidadeOfertas());
+        assertEquals(2899.00, galaxy.getOfertas().get(0).getPreco(), 0.01);
+    }
+
+    @Test
+    @DisplayName("Aplicar preço atualiza a oferta existente e guarda o histórico")
+    void testAplicarPrecoLojaExistente() {
+        galaxy.aplicarPreco("Amazon Brasil", 2899.00, 0.00, null);
+
+        // Caso 1: preço diferente atualiza e não duplica a oferta
+        galaxy.aplicarPreco("amazon brasil", 2799.00, 0.00, null);
+        assertEquals(1, galaxy.getQuantidadeOfertas());
+        assertEquals(2799.00, galaxy.getOfertas().get(0).getPreco(), 0.01);
+        assertEquals(1, galaxy.getOfertas().get(0).getHistoricoPrecos().size());
+
+        // Caso 2: mesmo preço não suja o histórico
+        galaxy.aplicarPreco("Amazon Brasil", 2799.00, 0.00, null);
+        assertEquals(1, galaxy.getOfertas().get(0).getHistoricoPrecos().size());
+    }
+
 }

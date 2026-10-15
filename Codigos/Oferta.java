@@ -13,9 +13,14 @@ public class Oferta {
     private final String loja;
     private double preco;
     private double frete;
+    private final String url;
     private final List<Double> historicoPrecos = new ArrayList<>();
 
     public Oferta(String loja, double preco, double frete) {
+    this(loja, preco, frete, null);
+    }
+
+    public Oferta(String loja, double preco, double frete, String url) {
         if (loja == null || loja.isBlank()) {
             throw new IllegalArgumentException("A loja é obrigatória.");
         }
@@ -28,6 +33,7 @@ public class Oferta {
         this.loja = loja;
         this.preco = preco;
         this.frete = frete;
+        this.url = url;
     }
 
     // UC06 - Atualizar preços: guarda o preço antigo antes de trocar
@@ -84,5 +90,9 @@ public class Oferta {
 
     public List<Double> getHistoricoPrecos() {
         return Collections.unmodifiableList(historicoPrecos);
+    }
+
+    public String getUrl() {
+    return url;
     }
 }

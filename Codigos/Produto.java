@@ -32,6 +32,18 @@ public class Produto {
         ofertas.add(oferta);
     }
 
+    public void aplicarPreco(String loja, double preco, double frete, String url) {
+        for (Oferta o : ofertas) {
+            if (o.getLoja().equalsIgnoreCase(loja)) {
+                if (o.getPreco() != preco) {
+                    o.atualizarPreco(preco);
+                }
+                return;
+            }
+        }
+        ofertas.add(new Oferta(loja, preco, frete, url));
+    }
+
     // Menor preço considerando o frete (o que o cliente paga de verdade)
     public Optional<Oferta> getOfertaMaisBarata() {
         Oferta maisBarata = null;

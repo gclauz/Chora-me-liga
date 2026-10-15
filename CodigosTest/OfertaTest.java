@@ -107,4 +107,15 @@ class OfertaTest {
         Oferta fastShop = new Oferta("Fast Shop", 2890.00, 22.00); // total 2912
         assertFalse(fastShop.isMaisBarataQue(amazon));
     }
+
+    @Test
+    @DisplayName("Oferta guarda a URL da loja")
+    void testUrl() {
+        // Caso 1: construtor antigo não tem URL
+        assertNull(amazon.getUrl());
+
+        // Caso 2: construtor novo guarda a URL
+        Oferta comUrl = new Oferta("Amazon Brasil", 2899.00, 0.00, "https://amazon.com.br/galaxy");
+        assertEquals("https://amazon.com.br/galaxy", comUrl.getUrl());
+    }
 }
