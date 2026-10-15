@@ -49,4 +49,4 @@ mvn clean test
 
 ## Fluxo de trabalho
 
-- Quadro Kanban: vou fazer aqui
+- Quadro Kanban: ![Quadro Kanban](Documentacao/Kanban.png)
