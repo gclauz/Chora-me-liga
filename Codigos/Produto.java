@@ -1,0 +1,65 @@
+package br.mackenzie.chorameliga.model;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+
+/**
+ * Representa um produto que pode ser pesquisado.
+ * Cada produto tem várias ofertas (uma por loja).
+ */
+public class Produto {
+
+    private final String nome;
+    private final String categoria;
+    private final String descricao;
+    private final List<Oferta> ofertas = new ArrayList<>();
+
+    public Produto(String nome, String categoria, String descricao) {
+        if (nome == null || nome.isBlank()) {
+            throw new IllegalArgumentException("O nome do produto é obrigatório.");
+        }
+        this.nome = nome;
+        this.categoria = categoria;
+        this.descricao = descricao;
+    }
+
+    public void adicionarOferta(Oferta oferta) {
+        if (oferta == null) {
+            throw new IllegalArgumentException("A oferta é obrigatória.");
+        }
+        ofertas.add(oferta);
+    }
+
+    // Menor preço considerando o frete (o que o cliente paga de verdade)
+    public Optional<Oferta> getOfertaMaisBarata() {
+        Oferta maisBarata = null;
+        for (Oferta o : ofertas) {
+            if (maisBarata == null || o.isMaisBarataQue(maisBarata)) {
+                maisBarata = o;
+            }
+        }
+        return Optional.ofNullable(maisBarata);
+    }
+
+    public int getQuantidadeOfertas() {
+        return ofertas.size();
+    }
+
+    public String getNome() {
+        return nome;
+    }
+
+    public String getCategoria() {
+        return categoria;
+    }
+
+    public String getDescricao() {
+        return descricao;
+    }
+
+    public List<Oferta> getOfertas() {
+        return Collections.unmodifiableList(ofertas);
+    }
+}
