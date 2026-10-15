@@ -21,7 +21,7 @@ Comparador de preços: o usuário pesquisa um produto pelo nome ou por foto e v�
 
 ## Arquitetura
 
-O código é organizado em camadas, em `Codigos/br/mackenzie/chorameliga/`:
+O sistema adota uma arquitetura em camada, em `Codigos/br/mackenzie/chorameliga/`:
 
 | Pasta | Responsabilidade |
 |---|---|
