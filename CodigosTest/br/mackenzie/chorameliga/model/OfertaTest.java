@@ -1,7 +1,6 @@
 package br.mackenzie.chorameliga.model;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -18,7 +17,6 @@ class OfertaTest {
     }
 
     @Test
-    @DisplayName("Construtor deve rejeitar dados inválidos")
     void testConstrutorComDadosInvalidos() {
         // Caso 1: loja vazia
         assertThrows(IllegalArgumentException.class,
@@ -34,7 +32,6 @@ class OfertaTest {
     }
 
     @Test
-    @DisplayName("Atualizar preço deve guardar o valor antigo no histórico")
     void testAtualizarPreco() {
         // Caso 1: uma atualização
         amazon.atualizarPreco(2799.00);
@@ -55,7 +52,6 @@ class OfertaTest {
     }
 
     @Test
-    @DisplayName("Menor preço do histórico")
     void testMenorPrecoHistorico() {
         // Caso 1: sem atualizações, o menor é o preço atual
         assertEquals(2899.00, amazon.getMenorPrecoHistorico(), 0.01);
@@ -71,7 +67,6 @@ class OfertaTest {
     }
 
     @Test
-    @DisplayName("Preço total deve somar o frete")
     void testCalcularPrecoTotal() {
         // Caso 1: frete grátis
         assertEquals(2899.00, amazon.calcularPrecoTotal(), 0.01);
@@ -83,7 +78,6 @@ class OfertaTest {
     }
 
     @Test
-    @DisplayName("Cálculo do valor da parcela")
     void testCalcularParcela() {
         // Caso 1: 10 parcelas
         assertEquals(289.90, amazon.calcularParcela(10), 0.01);
@@ -97,7 +91,6 @@ class OfertaTest {
     }
 
     @Test
-    @DisplayName("Comparação entre ofertas considerando o frete")
     void testIsMaisBarataQue() {
         // Caso 1: Amazon é mais barata que Magalu
         assertTrue(amazon.isMaisBarataQue(magalu));
@@ -109,12 +102,11 @@ class OfertaTest {
     }
 
     @Test
-    @DisplayName("Oferta guarda a URL da loja")
     void testUrl() {
-        // Caso 1: construtor antigo não tem URL
+        // Caso 1: construtor não tem URL
         assertNull(amazon.getUrl());
 
-        // Caso 2: construtor novo guarda a URL
+        // Caso 2: construtor guarda a URL
         Oferta comUrl = new Oferta("Amazon Brasil", 2899.00, 0.00, "https://amazon.com.br/galaxy");
         assertEquals("https://amazon.com.br/galaxy", comUrl.getUrl());
     }

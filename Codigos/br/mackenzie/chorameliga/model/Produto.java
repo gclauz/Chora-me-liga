@@ -5,10 +5,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-/**
- * Representa um produto que pode ser pesquisado.
- * Cada produto tem várias ofertas (uma por loja).
- */
+// Representa um produto que pode ser pesquisado.
+
 public class Produto {
 
     private final String nome;

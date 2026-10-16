@@ -4,10 +4,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-/**
- * Representa a oferta de um produto em uma loja.
- * Guarda o preço atual, o frete e os preços antigos (histórico de preços).
- */
+// Representa a oferta de um produto em uma loja.
+
 public class Oferta {
 
     private final String loja;

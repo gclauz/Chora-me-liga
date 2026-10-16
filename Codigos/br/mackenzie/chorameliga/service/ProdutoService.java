@@ -9,6 +9,7 @@ import br.mackenzie.chorameliga.repository.ProdutoRepository;
 import java.util.Comparator;
 import java.util.List;
 
+/*coordena o repository e o model */
 public class ProdutoService {
 
     private final ProdutoRepository repositorio;

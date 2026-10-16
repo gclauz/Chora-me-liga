@@ -1,7 +1,6 @@
 package br.mackenzie.chorameliga.model;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -17,16 +16,14 @@ class ProdutoTest {
     }
 
     @Test
-    @DisplayName("Construtor deve rejeitar nome inválido")
     void testConstrutorComNomeInvalido() {
-        assertThrows(IllegalArgumentException.class,
-                () -> new Produto("", "Smartphones", "desc"));
-        assertThrows(IllegalArgumentException.class,
-                () -> new Produto(null, "Smartphones", "desc"));
+        // Caso 1: nome vazio
+        assertThrows(IllegalArgumentException.class, () -> new Produto("", "Smartphones", "desc"));
+        // Caso 2: nome nulo
+        assertThrows(IllegalArgumentException.class, () -> new Produto(null, "Smartphones", "desc"));
     }
 
     @Test
-    @DisplayName("Adicionar oferta aumenta a quantidade de ofertas")
     void testAdicionarOferta() {
         // Caso 1: produto novo não tem ofertas
         assertEquals(0, galaxy.getQuantidadeOfertas());
@@ -42,7 +39,6 @@ class ProdutoTest {
     }
 
     @Test
-    @DisplayName("Oferta mais barata considera o frete")
     void testGetOfertaMaisBarata() {
         // Caso 1: sem ofertas
         assertTrue(galaxy.getOfertaMaisBarata().isEmpty());
@@ -58,24 +54,23 @@ class ProdutoTest {
     }
 
     @Test
-    @DisplayName("A lista de ofertas não pode ser alterada por fora")
     void testListaDeOfertasImutavel() {
         Oferta amazon = new Oferta("Amazon Brasil", 2899.00, 0.00);
-        assertThrows(UnsupportedOperationException.class,
-                () -> galaxy.getOfertas().add(amazon));
+        // Caso 1: tentar adicionar direto na lista devolvida
+        assertThrows(UnsupportedOperationException.class, () -> galaxy.getOfertas().add(amazon));
     }
 
-    @Test
-    @DisplayName("Aplicar preço cria a oferta se a loja é nova")
+    @Test   
     void testAplicarPrecoLojaNova() {
+        // Caso 1: loja que ainda não tem oferta cria uma nova
         galaxy.aplicarPreco("Amazon Brasil", 2899.00, 0.00, "https://amazon.com.br/galaxy");
 
+        // Caso 2: a oferta criada tem o preço informado
         assertEquals(1, galaxy.getQuantidadeOfertas());
         assertEquals(2899.00, galaxy.getOfertas().get(0).getPreco(), 0.01);
     }
 
     @Test
-    @DisplayName("Aplicar preço atualiza a oferta existente e guarda o histórico")
     void testAplicarPrecoLojaExistente() {
         galaxy.aplicarPreco("Amazon Brasil", 2899.00, 0.00, null);
 
@@ -91,11 +86,13 @@ class ProdutoTest {
     }
 
     @Test
-    @DisplayName("Aplicar preço informa se algo mudou")
     void testAplicarPrecoRetorno() {
-        assertTrue(galaxy.aplicarPreco("Amazon Brasil", 2899.00, 0.00, null));  // criou
-        assertTrue(galaxy.aplicarPreco("Amazon Brasil", 2799.00, 0.00, null));  // mudou
-        assertFalse(galaxy.aplicarPreco("Amazon Brasil", 2799.00, 0.00, null)); // igual
+        // Caso 1: loja nova, criou a oferta
+        assertTrue(galaxy.aplicarPreco("Amazon Brasil", 2899.00, 0.00, null));
+        // Caso 2: preço diferente, mudou
+        assertTrue(galaxy.aplicarPreco("Amazon Brasil", 2799.00, 0.00, null));
+        // Caso 3: mesmo preço, nada mudou
+        assertFalse(galaxy.aplicarPreco("Amazon Brasil", 2799.00, 0.00, null));
     }
 
 }

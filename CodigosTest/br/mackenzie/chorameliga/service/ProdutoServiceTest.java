@@ -6,7 +6,6 @@ import br.mackenzie.chorameliga.model.Oferta;
 import br.mackenzie.chorameliga.model.Produto;
 import br.mackenzie.chorameliga.repository.ProdutoRepository;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -23,8 +22,7 @@ class ProdutoServiceTest {
         repositorio = new ProdutoRepository();
         service = new ProdutoService(repositorio);
 
-        galaxy = new Produto("Smartphone Samsung Galaxy S23 128GB", "Smartphones",
-                "Tela 6.1 AMOLED, Snapdragon 8 Gen 2");
+        galaxy = new Produto("Smartphone Samsung Galaxy S23 128GB", "Smartphones","Tela 6.1 AMOLED, Snapdragon 8 Gen 2");
         amazon = new Oferta("Amazon Brasil", 2899.00, 0.00, "https://www.amazon.com.br");
         galaxy.adicionarOferta(new Oferta("Magazine Luiza", 2949.00, 15.00)); // total 2964
         galaxy.adicionarOferta(amazon);                                       // total 2899
@@ -33,31 +31,36 @@ class ProdutoServiceTest {
     }
 
     @Test
-    @DisplayName("Ofertas vêm ordenadas do menor para o maior preço total")
     void testOfertasOrdenadas() {
         DetalhesProduto detalhes = service.buscarDetalhes(galaxy.getId());
-
+        
+        // Caso 1: os dados do produto vêm preenchidos
         assertEquals("Smartphone Samsung Galaxy S23 128GB", detalhes.nome());
         assertEquals(3, detalhes.ofertas().size());
+        
+        // Caso 2: ofertas ordenadas do menor para o maior preço total
         assertEquals("Amazon Brasil", detalhes.ofertas().get(0).loja());
         assertEquals("Fast Shop", detalhes.ofertas().get(1).loja());
         assertEquals("Magazine Luiza", detalhes.ofertas().get(2).loja());
     }
 
     @Test
-    @DisplayName("Cada oferta traz total, frete grátis, parcela e URL")
     void testCamposDaOferta() {
         OfertaDetalhe primeira = service.buscarDetalhes(galaxy.getId()).ofertas().get(0);
 
+        // Caso 1: preço e preço total (frete grátis, então são iguais)
         assertEquals(2899.00, primeira.preco(), 0.01);
         assertEquals(2899.00, primeira.precoTotal(), 0.01);
+
+        // Caso 2: frete grátis e parcela de 10x
         assertTrue(primeira.freteGratis());
         assertEquals(289.90, primeira.parcela10x(), 0.01);
+        
+        // Caso 3: URL da loja
         assertEquals("https://www.amazon.com.br", primeira.url());
     }
 
     @Test
-    @DisplayName("Menor preço atual e menor preço histórico")
     void testMenoresPrecos() {
         // Caso 1: sem atualizações, os dois são o menor preço da oferta mais barata
         DetalhesProduto antes = service.buscarDetalhes(galaxy.getId());
@@ -73,27 +76,29 @@ class ProdutoServiceTest {
     }
 
     @Test
-    @DisplayName("Produto sem ofertas retorna lista vazia e preços nulos")
     void testProdutoSemOfertas() {
         Produto tv = new Produto("Smart TV 50 4K", "Smart TVs", "desc");
         repositorio.salvar(tv);
 
         DetalhesProduto detalhes = service.buscarDetalhes(tv.getId());
 
+        // Caso 1: lista de ofertas vazia
         assertTrue(detalhes.ofertas().isEmpty());
+
+        // Caso 2: sem ofertas, os menores preços são nulos
         assertNull(detalhes.menorPrecoAtual());
         assertNull(detalhes.menorPrecoHistorico());
     }
 
     @Test
-    @DisplayName("Id inexistente lança ProdutoNaoEncontrado")
     void testIdInexistente() {
+        // Caso 1: id que não existe lança ProdutoNaoEncontrado
         assertThrows(ProdutoNaoEncontrado.class, () -> service.buscarDetalhes(999));
     }
 
     @Test
-    @DisplayName("Construtor rejeita repositório nulo")
     void testConstrutorInvalido() {
+        // Caso 1: repositório nulo é rejeitado
         assertThrows(IllegalArgumentException.class, () -> new ProdutoService(null));
     }
 }

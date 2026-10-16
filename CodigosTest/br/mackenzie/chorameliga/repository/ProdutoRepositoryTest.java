@@ -2,7 +2,6 @@ package br.mackenzie.chorameliga.repository;
 
 import br.mackenzie.chorameliga.model.Produto;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -22,7 +21,6 @@ class ProdutoRepositoryTest {
     }
 
     @Test
-    @DisplayName("Salvar adiciona o produto e rejeita nulo")
     void testSalvar() {
         // Caso 1: os 3 produtos do setUp foram salvos
         assertEquals(3, repositorio.listarTodos().size());
@@ -33,7 +31,6 @@ class ProdutoRepositoryTest {
     }
 
     @Test
-    @DisplayName("Busca ignora maiúsculas e minúsculas")
     void testBuscaIgnoraMaiusculas() {
         // Caso 1: tudo minúsculo
         assertEquals(1, repositorio.buscarPorNome("galaxy").size());
@@ -43,7 +40,6 @@ class ProdutoRepositoryTest {
     }
 
     @Test
-    @DisplayName("Busca ignora acentos")
     void testBuscaIgnoraAcentos() {
         // Caso 1: sem acento encontra produto com acento
         assertEquals(1, repositorio.buscarPorNome("camera").size());
@@ -53,7 +49,6 @@ class ProdutoRepositoryTest {
     }
 
     @Test
-    @DisplayName("Busca com várias palavras em qualquer ordem")
     void testBuscaComVariasPalavras() {
         // Caso 1: palavras na mesma ordem do nome
         assertEquals(1, repositorio.buscarPorNome("galaxy s23").size());
@@ -66,7 +61,6 @@ class ProdutoRepositoryTest {
     }
 
     @Test
-    @DisplayName("Busca sem resultado ou com texto vazio retorna lista vazia")
     void testBuscaSemResultado() {
         // Caso 1: nenhum produto com esse nome
         assertTrue(repositorio.buscarPorNome("geladeira").isEmpty());
@@ -77,31 +71,33 @@ class ProdutoRepositoryTest {
     }
 
     @Test
-    @DisplayName("A lista de produtos não pode ser alterada por fora")
     void testListaImutavel() {
         List<Produto> lista = repositorio.listarTodos();
-        assertThrows(UnsupportedOperationException.class,
-                () -> lista.add(new Produto("Outro", "Cat", "desc")));
+        // Caso 1: tentar adicionar direto na lista devolvida lança erro
+        assertThrows(UnsupportedOperationException.class, () -> lista.add(new Produto("Outro", "Cat", "desc")));
     }
     @Test
-    @DisplayName("Salvar gera um id único para cada produto")
     void testSalvarGeraId() {
         Produto a = new Produto("Teclado Mecânico", "Periféricos", "desc");
         Produto b = new Produto("Mouse Gamer", "Periféricos", "desc");
         repositorio.salvar(a);
         repositorio.salvar(b);
 
+        // Caso 1: todo produto salvo recebe um id
         assertNotNull(a.getId());
         assertNotNull(b.getId());
+        
+        // Caso 2: os ids são diferentes entre si
         assertNotEquals(a.getId(), b.getId());
     }
 
     @Test
-    @DisplayName("Buscar por id encontra o produto ou retorna vazio")
     void testBuscarPorId() {
         Produto primeiro = repositorio.listarTodos().get(0);
-
+        // Caso 1: id existente devolve o próprio produto
         assertSame(primeiro, repositorio.buscarPorId(primeiro.getId()).get());
+        
+        // Caso 2: id inexistente devolve vazio
         assertTrue(repositorio.buscarPorId(999).isEmpty());
     }
 }

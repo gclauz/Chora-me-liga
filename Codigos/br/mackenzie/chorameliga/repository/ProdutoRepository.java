@@ -8,10 +8,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-/**
- * Guarda os produtos e permite pesquisar por nome (UC01).
- * Por enquanto os dados ficam em memória.
- */
+
+// Guarda os produtos e permite pesquisar por nome (UC01).
+
 public class ProdutoRepository {
 
     private final List<Produto> produtos = new ArrayList<>();
