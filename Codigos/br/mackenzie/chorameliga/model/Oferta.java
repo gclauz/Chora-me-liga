@@ -15,7 +15,7 @@ public class Oferta {
     private final List<Double> historicoPrecos = new ArrayList<>();
 
     public Oferta(String loja, double preco, double frete) {
-    this(loja, preco, frete, null);
+        this(loja, preco, frete, null);
     }
 
     public Oferta(String loja, double preco, double frete, String url) {
@@ -91,6 +91,6 @@ public class Oferta {
     }
 
     public String getUrl() {
-    return url;
+        return url;
     }
 }

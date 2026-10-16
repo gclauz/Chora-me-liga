@@ -45,7 +45,7 @@ public class Produto {
         return true;
     }
 
-    // Menor preço considerando o frete (o que o cliente paga de verdade)
+    // Menor preço considerando o frete 
     public Optional<Oferta> getOfertaMaisBarata() {
         Oferta maisBarata = null;
         for (Oferta o : ofertas) {

@@ -9,7 +9,7 @@ import br.mackenzie.chorameliga.repository.ProdutoRepository;
 import java.util.Comparator;
 import java.util.List;
 
-/*coordena o repository e o model */
+//coordena o repository e o model 
 public class ProdutoService {
 
     private final ProdutoRepository repositorio;
@@ -23,23 +23,14 @@ public class ProdutoService {
 
     // UC03 - Acessar detalhes do produto
     public DetalhesProduto buscarDetalhes(long id) {
-        Produto produto = repositorio.buscarPorId(id)
-                .orElseThrow(() -> new ProdutoNaoEncontrado(id));
+        Produto produto = repositorio.buscarPorId(id).orElseThrow(() -> new ProdutoNaoEncontrado(id));
 
-        // da oferta mais barata para a mais cara, considerando o frete
-        List<OfertaDetalhe> ofertas = produto.getOfertas().stream()
-                .sorted(Comparator.comparingDouble(Oferta::calcularPrecoTotal))
-                .map(this::paraDetalhe)
-                .toList();
+        // oferta mais barata para a mais cara, considerando o frete
+        List<OfertaDetalhe> ofertas = produto.getOfertas().stream().sorted(Comparator.comparingDouble(Oferta::calcularPrecoTotal)).map(this::paraDetalhe).toList();
 
-        Double menorPrecoAtual = produto.getOfertaMaisBarata()
-                .map(Oferta::getPreco)
-                .orElse(null);
+        Double menorPrecoAtual = produto.getOfertaMaisBarata().map(Oferta::getPreco).orElse(null);
 
-        Double menorPrecoHistorico = produto.getOfertas().stream()
-                .map(Oferta::getMenorPrecoHistorico)
-                .min(Comparator.naturalOrder())
-                .orElse(null);
+        Double menorPrecoHistorico = produto.getOfertas().stream().map(Oferta::getMenorPrecoHistorico).min(Comparator.naturalOrder()).orElse(null);
 
         return new DetalhesProduto(
                 produto.getId(),

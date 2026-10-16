@@ -64,8 +64,6 @@ public class ProdutoRepository {
     }
 
     private String normalizar(String texto) {
-        return Normalizer.normalize(texto, Normalizer.Form.NFD)
-                .replaceAll("\\p{InCombiningDiacriticalMarks}+", "")
-                .toLowerCase();
+        return Normalizer.normalize(texto, Normalizer.Form.NFD).replaceAll("\\p{InCombiningDiacriticalMarks}+", "").toLowerCase();
     }
 }
