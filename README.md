@@ -17,7 +17,6 @@ Comparador de preços: o usuário pesquisa um produto pelo nome ou por foto e v�
 |---|---|---|
 | UC01 Pesquisar produto manualmente | REQ-01 | Lógica pronta e testada |
 | UC03 Acessar detalhes do produto | REQ-03 | Lógica pronta e testada |
-| UC06 Atualizar preços | REQ-06 | Lógica pronta (fonte simulada) |
 
 ## Arquitetura
 
