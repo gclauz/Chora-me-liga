@@ -1,0 +1,179 @@
+package br.mackenzie.chorameliga.service;
+
+import br.mackenzie.chorameliga.catalogo.FonteCatalogo;
+import br.mackenzie.chorameliga.catalogo.FonteCatalogoFake;
+import br.mackenzie.chorameliga.catalogo.OfertaExterna;
+import br.mackenzie.chorameliga.catalogo.ProdutoExterno;
+import br.mackenzie.chorameliga.model.Oferta;
+import br.mackenzie.chorameliga.model.Produto;
+import br.mackenzie.chorameliga.repository.ProdutoRepository;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+class ImportacaoCatalogoServiceTest {
+
+    private ProdutoRepository repositorio;
+    private FonteCatalogoFake fonte;
+    private ImportacaoCatalogoService service;
+
+    @BeforeEach
+    void setUp() {
+        repositorio = new ProdutoRepository();
+        fonte = FonteCatalogoFake.comDadosDeExemplo();
+        service = new ImportacaoCatalogoService(repositorio, fonte);
+    }
+
+    @Test
+    void testImportaProdutosEOfertas() {
+        List<Produto> importados = service.importar("galaxy s23");
+
+        // Caso 1: os dois produtos da fonte foram importados e salvos
+        assertEquals(2, importados.size());
+        assertEquals(2, repositorio.listarTodos().size());
+
+        // Caso 2: cada produto recebeu as ofertas da fonte
+        Produto preto = repositorio.buscarPorIdExterno("MLB39957733").get();
+        assertEquals(3, preto.getQuantidadeOfertas());
+        assertEquals(3499.00, preto.getOfertaMaisBarata().get().getPreco(), 0.01);
+
+        Produto violeta = repositorio.buscarPorIdExterno("MLB47311354").get();
+        assertEquals(1, violeta.getQuantidadeOfertas());
+    }
+
+    @Test
+    void testImportarDuasVezesNaoDuplica() {
+        service.importar("galaxy s23");
+        service.importar("galaxy s23");
+
+        // Caso 1: os produtos não são duplicados
+        assertEquals(2, repositorio.listarTodos().size());
+
+        // Caso 2: as ofertas também não, e o histórico continua vazio (preços iguais)
+        Produto preto = repositorio.buscarPorIdExterno("MLB39957733").get();
+        assertEquals(3, preto.getQuantidadeOfertas());
+        assertTrue(preto.getOfertas().get(0).getHistoricoPrecos().isEmpty());
+    }
+
+    @Test
+    void testAtualizaPrecoNaSegundaImportacao() {
+        service.importar("galaxy s23");
+
+        // a loja baixou o preço de 3499 para 3399
+        fonte.adicionar(
+                new ProdutoExterno("MLB39957733", "Smartphone Samsung Galaxy S23 256gb Preto", "MLB-CELLPHONES"),
+                List.of(new OfertaExterna("Loja Exemplo 1", 3399.00, 0.00),
+                        new OfertaExterna("Loja Exemplo 2", 4299.00, 0.00),
+                        new OfertaExterna("Loja Exemplo 3", 4499.00, 0.00)));
+        service.importar("galaxy s23");
+
+        // Caso 1: o preço novo foi aplicado, sem duplicar a oferta
+        Produto preto = repositorio.buscarPorIdExterno("MLB39957733").get();
+        Oferta primeira = preto.getOfertas().get(0);
+        assertEquals(3, preto.getQuantidadeOfertas());
+        assertEquals(3399.00, primeira.getPreco(), 0.01);
+
+        // Caso 2: o preço antigo ficou no histórico
+        assertEquals(1, primeira.getHistoricoPrecos().size());
+        assertEquals(3499.00, primeira.getHistoricoPrecos().get(0), 0.01);
+    }
+
+    @Test
+    void testReaproveitaProdutoJaCadastrado() {
+        Produto existente = new Produto("Nome salvo antes", "Smartphones", "desc", "MLB39957733");
+        repositorio.salvar(existente);
+
+        service.importar("galaxy s23");
+
+        // Caso 1: o produto de mesmo id externo foi reaproveitado, só o outro é novo
+        assertEquals(2, repositorio.listarTodos().size());
+
+        // Caso 2: ele recebeu as ofertas e manteve o nome
+        assertEquals(3, existente.getQuantidadeOfertas());
+        assertEquals("Nome salvo antes", existente.getNome());
+    }
+
+    @Test
+    void testOfertasRecebemUrlDoCatalogo() {
+        service.importar("preto");
+
+        Produto preto = repositorio.buscarPorIdExterno("MLB39957733").get();
+        assertEquals("https://www.mercadolivre.com.br/p/MLB39957733", preto.getOfertas().get(0).getUrl());
+    }
+
+    @Test
+    void testOfertaInvalidaNaoInterrompe() {
+        FonteCatalogoFake fonteComDadoRuim = new FonteCatalogoFake();
+        fonteComDadoRuim.adicionar(
+                new ProdutoExterno("MLB1", "Produto Teste", "MLB-TESTE"),
+                List.of(new OfertaExterna("Loja Ruim", 0.00, 0.00),
+                        new OfertaExterna("Loja Boa", 100.00, 0.00)));
+        ImportacaoCatalogoService outro = new ImportacaoCatalogoService(repositorio, fonteComDadoRuim);
+
+        outro.importar("produto");
+
+        // Caso 1: a oferta com preço zero foi ignorada
+        Produto produto = repositorio.buscarPorIdExterno("MLB1").get();
+        assertEquals(1, produto.getQuantidadeOfertas());
+
+        // Caso 2: a oferta válida foi aplicada
+        assertEquals("Loja Boa", produto.getOfertas().get(0).getLoja());
+    }
+
+    @Test
+    void testFonteComErroNasOfertas() {
+        FonteCatalogo fonteComErro = new FonteCatalogo() {
+            @Override
+            public List<ProdutoExterno> pesquisarProdutos(String nome) {
+                return List.of(new ProdutoExterno("MLB2", "Produto Sem Ofertas", "MLB-TESTE"));
+            }
+
+            @Override
+            public List<OfertaExterna> buscarOfertas(String idExterno) {
+                throw new IllegalStateException("fora do ar");
+            }
+        };
+        ImportacaoCatalogoService outro = new ImportacaoCatalogoService(repositorio, fonteComErro);
+
+        List<Produto> importados = outro.importar("produto");
+
+        // Caso 1: o produto foi salvo mesmo sem conseguir as ofertas
+        assertEquals(1, importados.size());
+
+        // Caso 2: ele ficou sem ofertas, sem lançar erro
+        assertEquals(0, importados.get(0).getQuantidadeOfertas());
+    }
+
+    @Test
+    void testNomeInvalido() {
+        // Caso 1: nome vazio
+        assertThrows(IllegalArgumentException.class, () -> service.importar("  "));
+
+        // Caso 2: nome nulo
+        assertThrows(IllegalArgumentException.class, () -> service.importar(null));
+
+        // Caso 3: nada foi salvo
+        assertTrue(repositorio.listarTodos().isEmpty());
+    }
+
+    @Test
+    void testSemResultados() {
+        // Caso 1: pesquisa sem correspondência devolve lista vazia
+        assertTrue(service.importar("geladeira").isEmpty());
+
+        // Caso 2: o repositório continua vazio
+        assertTrue(repositorio.listarTodos().isEmpty());
+    }
+
+    @Test
+    void testConstrutorInvalido() {
+        // Caso 1: repositório nulo
+        assertThrows(IllegalArgumentException.class, () -> new ImportacaoCatalogoService(null, fonte));
+
+        // Caso 2: fonte nula
+        assertThrows(IllegalArgumentException.class, () -> new ImportacaoCatalogoService(repositorio, null));
+    }
+}
