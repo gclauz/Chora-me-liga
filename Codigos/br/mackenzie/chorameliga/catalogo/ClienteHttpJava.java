@@ -44,7 +44,7 @@ public class ClienteHttpJava implements ClienteHttp {
             HttpResponse<String> resposta = cliente.send(requisicao,
                     HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
             if (resposta.statusCode() < 200 || resposta.statusCode() >= 300) {
-                throw new FonteIndisponivelException("A API respondeu com status " + resposta.statusCode());
+                throw new RespostaHttpException(resposta.statusCode());
             }
             return resposta.body();
         } catch (IOException e) {
