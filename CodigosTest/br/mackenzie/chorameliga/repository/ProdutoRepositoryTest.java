@@ -100,4 +100,31 @@ class ProdutoRepositoryTest {
         // Caso 2: id inexistente devolve vazio
         assertTrue(repositorio.buscarPorId(999).isEmpty());
     }
+
+    @Test
+void testBuscarPorIdExterno() {
+    Produto ml = new Produto("Smartphone Samsung Galaxy S23 256gb Preto", "Smartphones", "desc", "MLB39957733");
+    repositorio.salvar(ml);
+
+    // Caso 1: id externo existente devolve o produto
+    assertSame(ml, repositorio.buscarPorIdExterno("MLB39957733").get());
+
+    // Caso 2: id externo inexistente devolve vazio
+    assertTrue(repositorio.buscarPorIdExterno("MLB000").isEmpty());
+
+    // Caso 3: id externo nulo devolve vazio
+    assertTrue(repositorio.buscarPorIdExterno(null).isEmpty());
+}
+
+    @Test
+    void testSalvarRejeitaIdExternoDuplicado() {
+        repositorio.salvar(new Produto("Galaxy S23 Preto", "Smartphones", "desc", "MLB39957733"));
+
+        // Caso 1: outro produto com o mesmo id externo é rejeitado
+        assertThrows(IllegalArgumentException.class,
+                () -> repositorio.salvar(new Produto("Outro nome", "Smartphones", "desc", "MLB39957733")));
+
+        // Caso 2: o repositório não ganhou produto novo (3 do setUp + 1 salvo)
+        assertEquals(4, repositorio.listarTodos().size());
+    }
 }

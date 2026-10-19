@@ -95,4 +95,28 @@ class ProdutoTest {
         assertFalse(galaxy.aplicarPreco("Amazon Brasil", 2799.00, 0.00, null));
     }
 
+    @Test
+    void testIdExterno() {
+        // Caso 1: construtor antigo não tem id externo
+        assertNull(galaxy.getIdExterno());
+
+        // Caso 2: construtor novo guarda o id externo
+        Produto comId = new Produto("Smartphone Samsung Galaxy S23 256gb Preto", "Smartphones", "desc", "MLB39957733");
+        assertEquals("MLB39957733", comId.getIdExterno());
+
+        // Caso 3: id externo em branco é tratado como ausente
+        Produto semId = new Produto("Smart TV 50 4K", "Smart TVs", "desc", "  ");
+        assertNull(semId.getIdExterno());
+    }
+
+    @Test
+    void testUrlCatalogo() {
+        // Caso 1: produto sem id externo não tem link
+        assertNull(galaxy.getUrlCatalogo());
+
+        // Caso 2: com id externo, o link é montado a partir dele
+        Produto comId = new Produto("Smartphone Samsung Galaxy S23 256gb Preto", "Smartphones", "desc", "MLB39957733");
+        assertEquals("https://www.mercadolivre.com.br/p/MLB39957733", comId.getUrlCatalogo());
+    }
+
 }

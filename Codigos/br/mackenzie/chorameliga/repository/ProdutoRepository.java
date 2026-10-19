@@ -20,10 +20,25 @@ public class ProdutoRepository {
         if (produto == null) {
             throw new IllegalArgumentException("O produto é obrigatório.");
         }
+        if (produto.getIdExterno() != null && buscarPorIdExterno(produto.getIdExterno()).isPresent()) {
+            throw new IllegalArgumentException("Já existe um produto com esse id externo.");
+        }
         if (produto.getId() == null) {
             produto.setId(proximoId++);
         }
         produtos.add(produto);
+    }
+
+    public Optional<Produto> buscarPorIdExterno(String idExterno) {
+        if (idExterno == null) {
+            return Optional.empty();
+        }
+        for (Produto p : produtos) {
+            if (idExterno.equals(p.getIdExterno())) {
+                return Optional.of(p);
+            }
+        }
+        return Optional.empty();
     }
 
     public Optional<Produto> buscarPorId(long id) {
