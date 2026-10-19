@@ -13,15 +13,21 @@ public class Produto {
     private final String categoria;
     private final String descricao;
     private Long id;
+    private final String idExterno; 
     private final List<Oferta> ofertas = new ArrayList<>();
 
     public Produto(String nome, String categoria, String descricao) {
+        this(nome, categoria, descricao, null);
+    }
+
+    public Produto(String nome, String categoria, String descricao, String idExterno) {
         if (nome == null || nome.isBlank()) {
             throw new IllegalArgumentException("O nome do produto é obrigatório.");
         }
         this.nome = nome;
         this.categoria = categoria;
         this.descricao = descricao;
+        this.idExterno = (idExterno == null || idExterno.isBlank()) ? null : idExterno.trim();
     }
 
     public void adicionarOferta(Oferta oferta) {
@@ -82,5 +88,17 @@ public class Produto {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+
+    public String getIdExterno() {
+        return idExterno;
+    }
+
+    public String getUrlCatalogo() {
+        if (idExterno == null) {
+            return null;
+        }
+        return "https://www.mercadolivre.com.br/p/" + idExterno;
     }
 }
