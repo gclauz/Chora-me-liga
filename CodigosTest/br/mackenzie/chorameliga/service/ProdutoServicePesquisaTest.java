@@ -1,21 +1,21 @@
 package br.mackenzie.chorameliga.service;
-import br.mackenzie.chorameliga.dto.ProdutoResumo;
-import java.util.ArrayList;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 import br.mackenzie.chorameliga.catalogo.FonteCatalogo;
 import br.mackenzie.chorameliga.catalogo.FonteCatalogoFake;
 import br.mackenzie.chorameliga.catalogo.FonteIndisponivelException;
 import br.mackenzie.chorameliga.catalogo.OfertaExterna;
 import br.mackenzie.chorameliga.catalogo.ProdutoExterno;
+import br.mackenzie.chorameliga.dto.ProdutoResumo;
 import br.mackenzie.chorameliga.model.Produto;
 import br.mackenzie.chorameliga.repository.ProdutoRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -124,6 +124,7 @@ class ProdutoServicePesquisaTest {
         // Caso 3: nada foi importado
         assertTrue(repositorio.listarTodos().isEmpty());
     }
+
     @Test
     void testResumosTrazemQuantidadeEMenorPreco() {
         ProdutoService service = serviceComFonteDeExemplo();
@@ -150,6 +151,26 @@ class ProdutoServicePesquisaTest {
         assertEquals(1, resumos.size());
         assertEquals(0, resumos.get(0).quantidadeOfertas());
         assertNull(resumos.get(0).menorPreco());
+
+        // Caso 2: sem id externo, não há página no catálogo
+        assertNull(resumos.get(0).urlCatalogo());
+    }
+
+    @Test
+    void testResumosTrazemTambemProdutosSemOfertas() {
+        repositorio.salvar(new Produto("Galaxy sem ofertas", "Smartphones", "desc"));
+        ProdutoService service = serviceComFonteDeExemplo();
+
+        List<ProdutoResumo> resumos = service.pesquisarResumos("galaxy");
+
+        // Caso 1: os 3 aparecem (1 já salvo, sem ofertas, e 2 importados)
+        assertEquals(3, resumos.size());
+
+        // Caso 2: os importados trazem o link do catálogo e o menor preço
+        long comOfertas = resumos.stream().filter(r -> r.quantidadeOfertas() > 0).count();
+        assertEquals(2, comOfertas);
+        assertTrue(resumos.stream()
+                .anyMatch(r -> "https://www.mercadolivre.com.br/p/MLB39957733".equals(r.urlCatalogo())));
     }
 
     @Test
@@ -170,20 +191,5 @@ class ProdutoServicePesquisaTest {
 
         // Caso 2: os produtos não foram duplicados
         assertEquals(2, repositorio.listarTodos().size());
-    }
-
-    @Test
-    void testResumosComOfertasVemPrimeiro() {
-        repositorio.salvar(new Produto("Galaxy sem ofertas", "Smartphones", "desc"));
-        ProdutoService service = serviceComFonteDeExemplo();
-
-        List<ProdutoResumo> resumos = service.pesquisarResumos("galaxy");
-
-        // Caso 1: os 3 produtos aparecem (1 já salvo, sem ofertas, e 2 importados)
-        assertEquals(3, resumos.size());
-
-        // Caso 2: o produto sem ofertas fica por último, mesmo tendo sido salvo primeiro
-        assertEquals(0, resumos.get(2).quantidadeOfertas());
-        assertTrue(resumos.get(0).quantidadeOfertas() > 0);
     }
 }

@@ -11,9 +11,13 @@ import java.util.List;
 
 /**
  * Importa produtos e ofertas de uma fonte externa para o nosso repositório.
+ * Para de consultar a fonte quando já juntou produtos com oferta suficientes;
+ * os produtos sem oferta que foram examinados no caminho também são devolvidos.
  * Não sabe se a fonte é simulada ou o Mercado Livre: só usa o contrato FonteCatalogo.
  */
 public class ImportacaoCatalogoService {
+
+    private static final int MAX_COM_OFERTAS = 5;
 
     private final ProdutoRepository repositorio;
     private final FonteCatalogo fonte;
@@ -27,19 +31,36 @@ public class ImportacaoCatalogoService {
     }
 
     public List<Produto> importar(String nome) {
+        return importar(nome, null);
+    }
+
+    // Com domínio, só importa produtos desse tipo (ex.: MLB-NOTEBOOKS)
+    public List<Produto> importar(String nome, String dominio) {
         if (nome == null || nome.isBlank()) {
             throw new IllegalArgumentException("Informe o nome do produto.");
         }
+        String filtro = (dominio == null || dominio.isBlank()) ? null : dominio.trim();
 
         List<Produto> importados = new ArrayList<>();
-        for (ProdutoExterno externo : fonte.pesquisarProdutos(nome.trim())) {
+        int comOfertas = 0;
+        for (ProdutoExterno externo : fonte.pesquisarProdutos(nome.trim(), filtro)) {
+            if (comOfertas >= MAX_COM_OFERTAS) {
+                break; // já juntou o suficiente: não gasta mais consultas na fonte
+            }
             // sem id externo não dá para reconhecer o produto depois, então ignora
             if (externo.idExterno() == null || externo.idExterno().isBlank()) {
+                continue;
+            }
+            // proteção: uma fonte que ignora o filtro não pode trazer outros tipos
+            if (filtro != null && !filtro.equalsIgnoreCase(externo.categoria())) {
                 continue;
             }
             Produto produto = repositorio.buscarPorIdExterno(externo.idExterno())
                     .orElseGet(() -> salvarNovo(externo));
             aplicarOfertas(produto);
+            if (produto.getQuantidadeOfertas() > 0) {
+                comOfertas++;
+            }
             importados.add(produto);
         }
         return importados;

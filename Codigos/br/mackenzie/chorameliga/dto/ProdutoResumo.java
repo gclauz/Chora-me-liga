@@ -6,6 +6,7 @@ public record ProdutoResumo(
         String nome,
         String categoria,
         int quantidadeOfertas,
-        Double menorPreco // null se o produto não tem ofertas
+        Double menorPreco,   // null se o produto não tem ofertas
+        String urlCatalogo   // página do produto no Mercado Livre; null se não veio de lá
 ) {
 }
