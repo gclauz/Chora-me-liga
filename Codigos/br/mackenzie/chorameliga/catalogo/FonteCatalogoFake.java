@@ -54,6 +54,22 @@ public class FonteCatalogoFake implements FonteCatalogo {
         return encontrados;
     }
 
+    // Mesma pesquisa, mas só com os produtos do domínio pedido (a "categoria" do produto externo)
+    @Override
+    public List<ProdutoExterno> pesquisarProdutos(String nome, String dominio) {
+        List<ProdutoExterno> todos = pesquisarProdutos(nome);
+        if (dominio == null || dominio.isBlank()) {
+            return todos;
+        }
+        List<ProdutoExterno> doDominio = new ArrayList<>();
+        for (ProdutoExterno p : todos) {
+            if (dominio.trim().equalsIgnoreCase(p.categoria())) {
+                doDominio.add(p);
+            }
+        }
+        return doDominio;
+    }
+
     @Override
     public List<OfertaExterna> buscarOfertas(String idExterno) {
         if (idExterno == null) {
