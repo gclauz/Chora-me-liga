@@ -203,3 +203,30 @@ body {
   .form-busca { flex-direction: column; }
   .oferta { grid-template-columns: 1fr 1fr; }
 }
+
+/* ---------- seção "sem ofertas" ---------- */
+.sem-ofertas-secao {
+  margin-top: 24px;
+  background: #fff;
+  border: 1px solid var(--borda);
+  border-radius: 12px;
+  padding: 4px 16px;
+}
+.sem-ofertas-titulo {
+  cursor: pointer;
+  padding: 12px 0;
+  font-weight: 600;
+  color: var(--apagado);
+}
+.sem-ofertas-aviso { margin: 0 0 12px; font-size: .9rem; color: var(--apagado); }
+.sem-ofertas-lista { list-style: none; margin: 0 0 12px; padding: 0; }
+.sem-ofertas-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-top: 1px solid var(--borda);
+}
+.sem-ofertas-nome { font-size: .95rem; }
+.sem-ofertas-link { color: var(--verde-escuro); font-size: .85rem; white-space: nowrap; }
