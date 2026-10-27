@@ -1,12 +1,14 @@
 const formatoMoeda = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
 
+const telaBusca = document.getElementById("tela-busca");
+const telaCategorias = document.getElementById("tela-categorias");
+const telaResultados = document.getElementById("tela-resultados");
+const telaDetalhes = document.getElementById("tela-detalhes");
+const listaResultados = document.getElementById("lista-resultados");
+const conteudoDetalhes = document.getElementById("conteudo-detalhes");
 const formulario = document.getElementById("form-pesquisa");
 const campoNome = document.getElementById("campo-nome");
 const mensagem = document.getElementById("mensagem");
-const telaResultados = document.getElementById("tela-resultados");
-const listaResultados = document.getElementById("lista-resultados");
-const telaDetalhes = document.getElementById("tela-detalhes");
-const conteudoDetalhes = document.getElementById("conteudo-detalhes");
 const botaoVoltar = document.getElementById("botao-voltar");
 
 formulario.addEventListener("submit", (evento) => {
@@ -19,10 +21,26 @@ formulario.addEventListener("submit", (evento) => {
   pesquisar(nome);
 });
 
-botaoVoltar.addEventListener("click", () => {
-  telaDetalhes.hidden = true;
-  telaResultados.hidden = false;
+// cada categoria é um atalho: preenche o campo e faz a pesquisa com o termo do botão
+document.querySelectorAll(".categoria").forEach((botao) => {
+  botao.addEventListener("click", () => {
+    campoNome.value = botao.dataset.termo;
+    pesquisar(botao.dataset.termo);
+  });
 });
+
+botaoVoltar.addEventListener("click", () => mostrarTela("resultados"));
+
+// ---------- telas ----------
+
+// "inicio" = busca + categorias; "resultados" = busca + lista; "detalhes" = só o produto
+function mostrarTela(tela) {
+  telaBusca.hidden = tela === "detalhes";
+  telaCategorias.hidden = tela !== "inicio";
+  telaResultados.hidden = tela !== "resultados";
+  telaDetalhes.hidden = tela !== "detalhes";
+  window.scrollTo(0, 0);
+}
 
 // ---------- chamadas à API ----------
 
@@ -49,8 +67,7 @@ async function chamarApi(url) {
 }
 
 async function pesquisar(nome) {
-  telaDetalhes.hidden = true;
-  telaResultados.hidden = false;
+  mostrarTela("resultados");
   limpar(listaResultados);
   mostrarMensagem("Pesquisando...");
   try {
@@ -67,8 +84,7 @@ async function pesquisar(nome) {
 }
 
 async function abrirDetalhes(id) {
-  telaResultados.hidden = true;
-  telaDetalhes.hidden = false;
+  mostrarTela("detalhes");
   limpar(conteudoDetalhes);
   mostrarMensagem("Carregando detalhes...");
   try {
