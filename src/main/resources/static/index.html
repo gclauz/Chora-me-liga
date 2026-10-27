@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ChoraMeLiga - Compare preços antes de comprar</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topo">
+    <h1 class="logo">Chora<span>Me</span>Liga</h1>
+  </header>
+
+  <main class="conteudo">
+    <section class="busca">
+      <h2>Compare preços antes de comprar</h2>
+      <form id="form-pesquisa" class="form-busca">
+        <input id="campo-nome" type="search" placeholder="Digite o nome de um produto (ex.: Galaxy S23)" required>
+        <button type="submit" class="botao">Pesquisar</button>
+      </form>
+      <button type="button" class="botao-foto" disabled title="Em breve">Pesquisar por foto</button>
+    </section>
+
+    <p id="mensagem" class="mensagem" role="status"></p>
+
+    <section id="tela-resultados">
+      <div id="lista-resultados" class="grade"></div>
+    </section>
+
+    <section id="tela-detalhes" hidden>
+      <button type="button" id="botao-voltar" class="link-voltar">← Voltar aos resultados</button>
+      <div id="conteudo-detalhes"></div>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
