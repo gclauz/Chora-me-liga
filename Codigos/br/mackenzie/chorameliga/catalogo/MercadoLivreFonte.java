@@ -55,16 +55,7 @@ public class MercadoLivreFonte implements FonteCatalogo {
             url += "&domain_id=" + codificar(dominio);
         }
 
-        String resposta;
-        try {
-            resposta = http.get(url, auth.getToken());
-        } catch (RespostaHttpException e) {
-            if (e.getStatus() == 404) {
-                return List.of(); // produto do catálogo sem ofertas ativas
-            }
-            throw e;
-        }
-        JsonNode json = lerJson(resposta);
+        JsonNode json = lerJson(http.get(url, auth.getToken()));
         List<ProdutoExterno> produtos = new ArrayList<>();
         for (JsonNode item : json.path("results")) {
             String id = item.path("id").asText("");
@@ -106,7 +97,7 @@ public class MercadoLivreFonte implements FonteCatalogo {
             double frete = envio.path("free_shipping").asBoolean(false)
                     ? 0.0
                     : envio.path("cost").asDouble(0.0);
-            brutas.add(new OfertaBruta(vendedor, preco, frete));
+            brutas.add(new OfertaBruta(vendedor, item.path("item_id").asText(""), preco, frete));
         }
 
         // as mais baratas primeiro (considerando o frete)
@@ -121,9 +112,18 @@ public class MercadoLivreFonte implements FonteCatalogo {
             if (!vendedoresVistos.add(o.vendedor())) {
                 continue; // mesmo vendedor: já ficou a oferta mais barata dele
             }
-            ofertas.add(new OfertaExterna(nomeDoVendedor(o.vendedor()), o.preco(), o.frete()));
+            ofertas.add(new OfertaExterna(nomeDoVendedor(o.vendedor()), o.preco(), o.frete(),
+                    urlDoItem(o.itemId())));
         }
         return ofertas;
+    }
+
+    // Link da própria oferta. Só monta para ids no formato MLB + números; senão devolve null
+    private String urlDoItem(String itemId) {
+        if (itemId != null && itemId.matches("MLB\\d+")) {
+            return "https://produto.mercadolivre.com.br/MLB-" + itemId.substring(3);
+        }
+        return null;
     }
 
     private String nomeDoVendedor(String vendedorId) {
@@ -156,6 +156,6 @@ public class MercadoLivreFonte implements FonteCatalogo {
         return URLEncoder.encode(valor, StandardCharsets.UTF_8).replace("+", "%20");
     }
 
-    private record OfertaBruta(String vendedor, double preco, double frete) {
+    private record OfertaBruta(String vendedor, String itemId, double preco, double frete) {
     }
 }

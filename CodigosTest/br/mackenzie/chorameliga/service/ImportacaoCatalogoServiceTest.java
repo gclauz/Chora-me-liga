@@ -176,4 +176,24 @@ class ImportacaoCatalogoServiceTest {
         // Caso 2: fonte nula
         assertThrows(IllegalArgumentException.class, () -> new ImportacaoCatalogoService(repositorio, null));
     }
+
+    @Test
+    void testOfertaComLinkProprioUsaOLinkDela() {
+        FonteCatalogoFake fonteComLink = new FonteCatalogoFake();
+        fonteComLink.adicionar(
+                new ProdutoExterno("MLB1", "Produto Teste", "MLB-TESTE"),
+                List.of(new OfertaExterna("Loja A", 100.00, 0.00, "https://produto.mercadolivre.com.br/MLB-111"),
+                        new OfertaExterna("Loja B", 200.00, 0.00)));
+        ImportacaoCatalogoService outro = new ImportacaoCatalogoService(repositorio, fonteComLink);
+
+        outro.importar("produto");
+
+        Produto produto = repositorio.buscarPorIdExterno("MLB1").get();
+
+        // Caso 1: a oferta com link próprio mantém o link
+        assertEquals("https://produto.mercadolivre.com.br/MLB-111", produto.getOfertas().get(0).getUrl());
+
+        // Caso 2: a oferta sem link usa a página do produto
+        assertEquals("https://www.mercadolivre.com.br/p/MLB1", produto.getOfertas().get(1).getUrl());
+    }
 }

@@ -62,8 +62,12 @@ public class ImportacaoCatalogoService {
             return;
         }
         for (OfertaExterna oferta : ofertas) {
+            // link da própria oferta; se a fonte não informou, usa a página do produto
+            String link = (oferta.url() != null && !oferta.url().isBlank())
+                    ? oferta.url()
+                    : produto.getUrlCatalogo();
             try {
-                produto.aplicarPreco(oferta.loja(), oferta.preco(), oferta.frete(), produto.getUrlCatalogo());
+                produto.aplicarPreco(oferta.loja(), oferta.preco(), oferta.frete(), link);
             } catch (IllegalArgumentException e) {
                 // dado inválido vindo de fora (ex.: preço zero): ignora só esta oferta
             }

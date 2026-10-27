@@ -270,4 +270,26 @@ class MercadoLivreFonteTest {
         assertThrows(FonteIndisponivelException.class, () -> fonte.buscarOfertas("MLB9"));
     }
 
+    @Test
+    void testLinkDaOferta() {
+        http.responder("/products/MLB9/items", """
+                {"results":[
+                  {"item_id":"MLB7329366394","seller_id":111,"price":100,"shipping":{"cost":0}},
+                  {"item_id":"MLBU123","seller_id":222,"price":200,"shipping":{"cost":0}},
+                  {"seller_id":333,"price":300,"shipping":{"cost":0}}]}
+                """);
+        http.responder("/users/", "{\"nickname\":\"LOJA\"}");
+
+        List<OfertaExterna> ofertas = fonte.buscarOfertas("MLB9");
+
+        // Caso 1: item_id no formato MLB + números vira o link da oferta
+        assertEquals("https://produto.mercadolivre.com.br/MLB-7329366394", ofertas.get(0).url());
+
+        // Caso 2: id em outro formato não vira link
+        assertNull(ofertas.get(1).url());
+
+        // Caso 3: sem item_id, sem link
+        assertNull(ofertas.get(2).url());
+    }
+
 }
