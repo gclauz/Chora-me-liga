@@ -2,6 +2,7 @@ package br.mackenzie.chorameliga.service;
 
 import br.mackenzie.chorameliga.dto.DetalhesProduto;
 import br.mackenzie.chorameliga.dto.OfertaDetalhe;
+import br.mackenzie.chorameliga.dto.ProdutoResumo;
 import br.mackenzie.chorameliga.model.Oferta;
 import br.mackenzie.chorameliga.model.Produto;
 import br.mackenzie.chorameliga.repository.ProdutoRepository;
@@ -28,7 +29,7 @@ public class ProdutoService {
     }
 
     // UC01 - Pesquisar produto manualmente
-    public List<Produto> pesquisarPorNome(String nome) {
+    public synchronized List<Produto> pesquisarPorNome(String nome) {
         if (nome == null || nome.isBlank()) {
             throw new IllegalArgumentException("Informe o nome do produto.");
         }
@@ -53,8 +54,15 @@ public class ProdutoService {
         return resultado;
     }
 
+    // UC01 para a API: a mesma pesquisa, já convertida em dados prontos para a tela
+    public synchronized List<ProdutoResumo> pesquisarResumos(String nome) {
+        return pesquisarPorNome(nome).stream()
+                .map(this::paraResumo)
+                .sorted(Comparator.comparing(resumo -> resumo.quantidadeOfertas() == 0))
+                .toList();
+    }
     // UC03 - Acessar detalhes do produto
-    public DetalhesProduto buscarDetalhes(long id) {
+    public synchronized DetalhesProduto buscarDetalhes(long id) {
         Produto produto = repositorio.buscarPorId(id)
                 .orElseThrow(() -> new ProdutoNaoEncontrado(id));
 
@@ -82,6 +90,14 @@ public class ProdutoService {
                 menorPrecoAtual,
                 menorPrecoHistorico
         );
+    }
+
+    private ProdutoResumo paraResumo(Produto p) {
+        Double menorPreco = p.getOfertaMaisBarata()
+                .map(Oferta::getPreco)
+                .orElse(null);
+        return new ProdutoResumo(p.getId(), p.getNome(), p.getCategoria(),
+                p.getQuantidadeOfertas(), menorPreco);
     }
 
     private OfertaDetalhe paraDetalhe(Oferta o) {
