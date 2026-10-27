@@ -105,6 +105,26 @@ class ImportacaoCatalogoServiceTest {
     }
 
     @Test
+    void testOfertaComLinkProprioUsaOLinkDela() {
+        FonteCatalogoFake fonteComLink = new FonteCatalogoFake();
+        fonteComLink.adicionar(
+                new ProdutoExterno("MLB1", "Produto Teste", "MLB-TESTE"),
+                List.of(new OfertaExterna("Loja A", 100.00, 0.00, "https://produto.mercadolivre.com.br/MLB-111"),
+                        new OfertaExterna("Loja B", 200.00, 0.00)));
+        ImportacaoCatalogoService outro = new ImportacaoCatalogoService(repositorio, fonteComLink);
+
+        outro.importar("produto");
+
+        Produto produto = repositorio.buscarPorIdExterno("MLB1").get();
+
+        // Caso 1: a oferta com link próprio mantém o link
+        assertEquals("https://produto.mercadolivre.com.br/MLB-111", produto.getOfertas().get(0).getUrl());
+
+        // Caso 2: a oferta sem link usa a página do produto
+        assertEquals("https://www.mercadolivre.com.br/p/MLB1", produto.getOfertas().get(1).getUrl());
+    }
+
+    @Test
     void testOfertaInvalidaNaoInterrompe() {
         FonteCatalogoFake fonteComDadoRuim = new FonteCatalogoFake();
         fonteComDadoRuim.adicionar(
@@ -145,6 +165,60 @@ class ImportacaoCatalogoServiceTest {
 
         // Caso 2: ele ficou sem ofertas, sem lançar erro
         assertEquals(0, importados.get(0).getQuantidadeOfertas());
+    }
+
+    @Test
+    void testProdutosSemOfertasTambemSaoDevolvidos() {
+        FonteCatalogoFake fonteMista = new FonteCatalogoFake();
+        fonteMista.adicionar(new ProdutoExterno("MLB1", "Console A sem oferta", "MLB-TESTE"), List.of());
+        fonteMista.adicionar(new ProdutoExterno("MLB2", "Console B", "MLB-TESTE"),
+                List.of(new OfertaExterna("Loja", 100.00, 0.00)));
+        fonteMista.adicionar(new ProdutoExterno("MLB3", "Console C", "MLB-TESTE"),
+                List.of(new OfertaExterna("Loja", 200.00, 0.00)));
+        ImportacaoCatalogoService outro = new ImportacaoCatalogoService(repositorio, fonteMista);
+
+        List<Produto> importados = outro.importar("console");
+
+        // Caso 1: os três aparecem, inclusive o sem oferta
+        assertEquals(3, importados.size());
+
+        // Caso 2: o produto sem oferta foi salvo, sem ofertas
+        assertEquals(0, repositorio.buscarPorIdExterno("MLB1").get().getQuantidadeOfertas());
+
+        // Caso 3: os outros dois têm uma oferta cada
+        assertEquals(1, repositorio.buscarPorIdExterno("MLB2").get().getQuantidadeOfertas());
+        assertEquals(1, repositorio.buscarPorIdExterno("MLB3").get().getQuantidadeOfertas());
+    }
+
+    @Test
+    void testParaDeConsultarAoReunirOsProdutosComOferta() {
+        FonteCatalogoFake base = new FonteCatalogoFake();
+        for (int i = 1; i <= 8; i++) {
+            base.adicionar(new ProdutoExterno("MLB" + i, "Console " + i, "MLB-TESTE"),
+                    List.of(new OfertaExterna("Loja", 100.00 + i, 0.00)));
+        }
+        int[] consultas = {0};
+        FonteCatalogo contador = new FonteCatalogo() {
+            @Override
+            public List<ProdutoExterno> pesquisarProdutos(String nome) {
+                return base.pesquisarProdutos(nome);
+            }
+
+            @Override
+            public List<OfertaExterna> buscarOfertas(String idExterno) {
+                consultas[0]++;
+                return base.buscarOfertas(idExterno);
+            }
+        };
+        ImportacaoCatalogoService outro = new ImportacaoCatalogoService(repositorio, contador);
+
+        List<Produto> importados = outro.importar("console");
+
+        // Caso 1: de 8 candidatos com oferta, entram só 5
+        assertEquals(5, importados.size());
+
+        // Caso 2: e só 5 consultas de ofertas foram feitas (não gasta as outras 3)
+        assertEquals(5, consultas[0]);
     }
 
     @Test

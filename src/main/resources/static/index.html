@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ChoraMeLiga - Compare preços antes de comprar</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topo">
+    <a href="/" class="logo">Chora<span>Me</span>Liga</a>
+    <nav class="menu">
+      <a href="/" class="ativo">Início</a>
+      <span class="em-breve" title="Disponível em breve">Pesquisar por foto</span>
+      <span class="em-breve" title="Disponível em breve">Histórico</span>
+      <span class="em-breve" title="Disponível em breve">Favoritos</span>
+    </nav>
+  </header>
+
+  <main class="conteudo">
+    <section id="tela-busca" class="hero">
+      <h2>Compare preços antes de comprar</h2>
+      <p class="subtitulo">Pesquise um produto e veja onde ele está mais barato.</p>
+      <form id="form-pesquisa" class="form-busca">
+        <input id="campo-nome" type="search" placeholder="Digite o nome de um produto (ex.: Galaxy S23)" required>
+        <button type="submit" class="botao">Pesquisar</button>
+      </form>
+
+      <div class="divisor"><span>ou compare visualmente</span></div>
+
+      <div class="cartao-foto">
+        <div>
+          <strong>Pesquisar por foto</strong>
+          <p>Envie uma foto para reconhecer o produto automaticamente.</p>
+        </div>
+        <button type="button" class="botao-secundario" disabled title="Disponível em breve">Carregar imagem (em breve)</button>
+      </div>
+    </section>
+
+    <p id="mensagem" class="mensagem" role="status"></p>
+
+    <section id="tela-categorias">
+      <h3 class="titulo-secao">Categorias populares</h3>
+      <div class="categorias">
+        <button type="button" class="categoria" data-termo="smartphone" data-dominio="MLB-CELLPHONES"><span class="categoria-icone">📱</span>Smartphones</button>
+        <button type="button" class="categoria" data-termo="smart tv" data-dominio="MLB-TELEVISIONS"><span class="categoria-icone">📺</span>Smart TVs</button>
+        <button type="button" class="categoria" data-termo="notebook" data-dominio="MLB-NOTEBOOKS"><span class="categoria-icone">💻</span>Notebooks</button>
+        <button type="button" class="categoria" data-termo="geladeira" data-dominio="MLB-REFRIGERATORS"><span class="categoria-icone">🧊</span>Geladeiras</button>
+        <button type="button" class="categoria" data-termo="console" data-dominio="MLB-GAME_CONSOLES"><span class="categoria-icone">🎮</span>Games &amp; Consoles</button>
+      </div>
+    </section>
+
+    <section id="tela-resultados" hidden>
+      <div id="lista-resultados" class="grade"></div>
+    </section>
+
+    <section id="tela-detalhes" hidden>
+      <button type="button" id="botao-voltar" class="link-voltar">← Voltar aos resultados</button>
+      <div id="conteudo-detalhes"></div>
+    </section>
+  </main>
+
+  <footer class="rodape">
+    <p><strong>ChoraMeLiga</strong> · Projeto de Laboratório de Engenharia de Software · Universidade Presbiteriana Mackenzie</p>
+    <p>Os preços vêm do Mercado Livre e podem mudar sem aviso.</p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
