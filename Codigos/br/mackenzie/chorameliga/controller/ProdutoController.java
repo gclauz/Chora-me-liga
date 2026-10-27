@@ -21,10 +21,12 @@ public class ProdutoController {
         this.service = service;
     }
 
-    // GET /api/produtos?nome=galaxy  (UC01)
+    // GET /api/produtos?nome=notebook&dominio=MLB-NOTEBOOKS  (UC01; o dominio é opcional)
     @GetMapping
-    public List<ProdutoResumo> pesquisar(@RequestParam("nome") String nome) {
-        return service.pesquisarResumos(nome);
+    public List<ProdutoResumo> pesquisar(
+            @RequestParam("nome") String nome,
+            @RequestParam(value = "dominio", required = false) String dominio) {
+        return service.pesquisarResumos(nome, dominio);
     }
 
     // GET /api/produtos/1  (UC03)

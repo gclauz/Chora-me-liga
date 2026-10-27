@@ -75,6 +75,25 @@ class ProdutoControllerTest {
     }
 
     @Test
+    void testPesquisarIncluiProdutoSemOfertas() throws Exception {
+        FonteCatalogoFake fonte = new FonteCatalogoFake();
+        fonte.adicionar(new ProdutoExterno("MLB1", "Console A", "MLB-TESTE"), List.of());
+        fonte.adicionar(new ProdutoExterno("MLB2", "Console B", "MLB-TESTE"),
+                List.of(new OfertaExterna("Loja", 100.00, 0.00)));
+
+        // Caso 1: os dois aparecem; o primeiro é o sem oferta, com o link do catálogo
+        montar(fonte).perform(get("/api/produtos").param("nome", "console"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(2))
+                .andExpect(jsonPath("$[0].quantidadeOfertas").value(0))
+                .andExpect(jsonPath("$[0].urlCatalogo").value("https://www.mercadolivre.com.br/p/MLB1"))
+
+                // Caso 2: o segundo tem oferta e menor preço
+                .andExpect(jsonPath("$[1].quantidadeOfertas").value(1))
+                .andExpect(jsonPath("$[1].menorPreco").value(100.0));
+    }
+
+    @Test
     void testDetalhes() throws Exception {
         // a pesquisa importa os produtos; o primeiro salvo recebe o id 1
         mockMvc.perform(get("/api/produtos").param("nome", "galaxy s23"));
