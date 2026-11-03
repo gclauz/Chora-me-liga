@@ -11,8 +11,6 @@
     <a href="/" class="logo">Chora<span>Me</span>Liga</a>
     <nav class="menu">
       <a href="/" class="ativo">Início</a>
-      <a href="#" id="menu-foto">Pesquisar por foto</a>
-      <span class="em-breve" title="Disponível em breve">Histórico</span>
       <span class="em-breve" title="Disponível em breve">Favoritos</span>
     </nav>
   </header>
@@ -43,12 +41,19 @@
     <p id="mensagem" class="mensagem" role="status"></p>
 
     <section id="tela-categorias">
+      <div id="area-historico" hidden>
+        <div class="historico-topo">
+          <h3 class="titulo-secao">Pesquisas recentes</h3>
+          <button type="button" id="botao-limpar-historico" class="link-discreto">Limpar histórico</button>
+        </div>
+        <ul id="lista-historico" class="historico"></ul>
+      </div>
+
       <h3 class="titulo-secao">Categorias populares</h3>
       <div class="categorias">
         <button type="button" class="categoria" data-termo="smartphone" data-dominio="MLB-CELLPHONES"><span class="categoria-icone">📱</span>Smartphones</button>
         <button type="button" class="categoria" data-termo="smart tv" data-dominio="MLB-TELEVISIONS"><span class="categoria-icone">📺</span>Smart TVs</button>
         <button type="button" class="categoria" data-termo="notebook" data-dominio="MLB-NOTEBOOKS"><span class="categoria-icone">💻</span>Notebooks</button>
-        <button type="button" class="categoria" data-termo="geladeira" data-dominio="MLB-REFRIGERATORS"><span class="categoria-icone">🧊</span>Geladeiras</button>
         <button type="button" class="categoria" data-termo="console" data-dominio="MLB-GAME_CONSOLES"><span class="categoria-icone">🎮</span>Games &amp; Consoles</button>
       </div>
     </section>

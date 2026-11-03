@@ -148,7 +148,60 @@ body {
 
 .titulo-secao { margin: 28px 4px 12px; font-size: 1.1rem; }
 
-.categorias { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+/* ---------- histórico de pesquisas ---------- */
+.historico-topo { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.link-discreto {
+  background: none;
+  border: 0;
+  padding: 4px;
+  color: var(--apagado);
+  font: inherit;
+  font-size: .85rem;
+  text-decoration: underline;
+  cursor: pointer;
+}
+.link-discreto:hover { color: var(--texto); }
+.historico { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+.historico-item {
+  display: flex;
+  align-items: center;
+  max-width: 100%;
+  background: #fff;
+  border: 1px solid var(--borda);
+  border-radius: 999px;
+}
+.historico-pesquisar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  background: none;
+  border: 0;
+  padding: 8px 4px 8px 14px;
+  font: inherit;
+  font-size: .9rem;
+  color: var(--texto);
+  cursor: pointer;
+}
+.historico-pesquisar:hover .historico-nome { text-decoration: underline; }
+.historico-nome { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.historico-detalhe { color: var(--apagado); font-size: .8rem; white-space: nowrap; }
+.historico-remover {
+  background: none;
+  border: 0;
+  padding: 8px 12px 8px 6px;
+  color: var(--apagado);
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.historico-remover:hover { color: #b3261e; }
+
+/* 4 categorias: uma linha de 4 no computador, 2 x 2 em telas estreitas */
+.categorias { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+@media (max-width: 640px) {
+  .categorias { grid-template-columns: repeat(2, 1fr); }
+}
 .categoria {
   display: flex;
   flex-direction: column;
