@@ -11,7 +11,7 @@
     <a href="/" class="logo">Chora<span>Me</span>Liga</a>
     <nav class="menu">
       <a href="/" class="ativo">Início</a>
-      <span class="em-breve" title="Disponível em breve">Pesquisar por foto</span>
+      <a href="#" id="menu-foto">Pesquisar por foto</a>
       <span class="em-breve" title="Disponível em breve">Histórico</span>
       <span class="em-breve" title="Disponível em breve">Favoritos</span>
     </nav>
@@ -23,17 +23,20 @@
       <p class="subtitulo">Pesquise um produto e veja onde ele está mais barato.</p>
       <form id="form-pesquisa" class="form-busca">
         <input id="campo-nome" type="search" placeholder="Digite o nome de um produto (ex.: Galaxy S23)" required>
+        <button type="button" id="botao-voz" class="botao-voz" title="Falar o nome do produto" aria-label="Falar o nome do produto" hidden>🎤</button>
         <button type="submit" class="botao">Pesquisar</button>
       </form>
 
       <div class="divisor"><span>ou compare visualmente</span></div>
 
       <div class="cartao-foto">
-        <div>
+        <img id="previa-foto" class="previa-foto" alt="Foto enviada" hidden>
+        <div class="cartao-foto-texto">
           <strong>Pesquisar por foto</strong>
-          <p>Envie uma foto para reconhecer o produto automaticamente.</p>
+          <p>Envie uma foto para reconhecer o produto automaticamente (JPG, PNG ou WEBP, até 5 MB).</p>
         </div>
-        <button type="button" class="botao-secundario" disabled title="Disponível em breve">Carregar imagem (em breve)</button>
+        <button type="button" id="botao-foto" class="botao-secundario">Carregar imagem</button>
+        <input type="file" id="campo-foto" accept="image/jpeg,image/png,image/webp" hidden>
       </div>
     </section>
 
