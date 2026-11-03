@@ -121,15 +121,27 @@ body {
   text-align: left;
 }
 .cartao-foto p { margin: 4px 0 0; font-size: .9rem; color: var(--apagado); }
+.cartao-foto-texto { flex: 1; min-width: 200px; }
+.previa-foto {
+  width: 64px;
+  height: 64px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid var(--borda);
+  background: #fff;
+}
 .botao-secundario {
   background: #fff;
-  border: 1px solid var(--borda);
+  border: 1px solid var(--verde);
   border-radius: 10px;
   padding: 10px 16px;
-  color: var(--apagado);
+  color: var(--verde-escuro);
   font: inherit;
-  cursor: not-allowed;
+  font-weight: 600;
+  cursor: pointer;
 }
+.botao-secundario:hover { background: var(--verde-claro); }
+.botao-secundario:disabled { border-color: var(--borda); color: var(--apagado); cursor: wait; }
 
 .mensagem { margin: 16px 4px; color: #4b5d57; min-height: 1.2em; }
 .mensagem.erro { color: #b3261e; }

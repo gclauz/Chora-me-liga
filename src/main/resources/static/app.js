@@ -56,6 +56,48 @@ document.querySelectorAll(".categoria").forEach((botao) => {
 
 botaoVoltar.addEventListener("click", () => mostrarTela("resultados"));
 
+// ---------- pesquisa por foto ----------
+
+const botaoFoto = document.getElementById("botao-foto");
+const campoFoto = document.getElementById("campo-foto");
+const previaFoto = document.getElementById("previa-foto");
+const TIPOS_FOTO = ["image/jpeg", "image/png", "image/webp"];
+const TAMANHO_MAXIMO_FOTO = 5 * 1024 * 1024; // mesmo limite do servidor
+let urlPrevia = null;
+
+botaoFoto.addEventListener("click", () => campoFoto.click());
+
+document.getElementById("menu-foto").addEventListener("click", (evento) => {
+  evento.preventDefault();
+  campoFoto.click();
+});
+
+campoFoto.addEventListener("change", () => {
+  const arquivo = campoFoto.files[0];
+  campoFoto.value = ""; // permite escolher a mesma foto de novo
+  if (!arquivo) {
+    return;
+  }
+  // confere antes de enviar para dar a resposta na hora; o servidor confere de novo
+  if (!TIPOS_FOTO.includes(arquivo.type)) {
+    mostrarMensagem("Formato de imagem não aceito. Use JPG, PNG ou WEBP.", true);
+    return;
+  }
+  if (arquivo.size > TAMANHO_MAXIMO_FOTO) {
+    mostrarMensagem("A foto deve ter no máximo 5 MB.", true);
+    return;
+  }
+
+  if (urlPrevia) {
+    URL.revokeObjectURL(urlPrevia);
+  }
+  urlPrevia = URL.createObjectURL(arquivo);
+  previaFoto.src = urlPrevia;
+  previaFoto.hidden = false;
+
+  pesquisarPorFoto(arquivo);
+});
+
 // ---------- pesquisa por voz ----------
 
 // usa o reconhecimento de fala do próprio navegador (Chrome/Edge); sem suporte, o botão fica escondido
@@ -142,10 +184,10 @@ function voltarAoInicio() {
 
 // ---------- chamadas à API ----------
 
-async function chamarApi(url) {
+async function chamarApi(url, opcoes) {
   let resposta;
   try {
-    resposta = await fetch(url);
+    resposta = await fetch(url, opcoes);
   } catch (e) {
     throw new Error("Não foi possível falar com o servidor.");
   }
@@ -181,28 +223,63 @@ async function pesquisar(nome, dominio) {
     if (minhaPesquisa !== numeroPesquisa) {
       return; // surgiu outra pesquisa (ou o campo foi apagado) enquanto esperava
     }
-
-    // separa quem tem oferta de quem não tem; a ordem que veio da API é mantida
-    const comOfertas = produtos.filter((p) => p.quantidadeOfertas > 0 && p.menorPreco != null);
-    const semOfertas = produtos.filter((p) => !(p.quantidadeOfertas > 0 && p.menorPreco != null));
-
-    if (comOfertas.length === 0) {
-      mostrarMensagem(semOfertas.length === 0
-          ? "Não encontramos produtos para essa pesquisa. Tente outro termo ou outra categoria."
-          : "Não encontramos ofertas para essa pesquisa no momento.");
-    } else {
-      mostrarMensagem(comOfertas.length + (comOfertas.length === 1 ? " produto encontrado" : " produtos encontrados"));
-      comOfertas.forEach((produto) => listaResultados.appendChild(criarCard(produto)));
-    }
-
-    if (semOfertas.length > 0) {
-      areaSemOfertas.appendChild(criarSecaoSemOfertas(semOfertas));
-    }
+    mostrarResultados(produtos, "");
   } catch (e) {
     if (minhaPesquisa !== numeroPesquisa) {
       return; // o erro é de uma pesquisa que já não vale
     }
     mostrarMensagem(e.message, true);
+  }
+}
+
+// UC02: envia a foto, mostra o que foi reconhecido e os produtos encontrados com esse nome
+async function pesquisarPorFoto(arquivo) {
+  const minhaPesquisa = ++numeroPesquisa;
+  mostrarTela("resultados");
+  limpar(listaResultados);
+  limpar(areaSemOfertas);
+  mostrarMensagem("Reconhecendo o produto na foto...");
+  botaoFoto.disabled = true;
+
+  const dados = new FormData();
+  dados.append("foto", arquivo);
+
+  try {
+    const resultado = await chamarApi("/api/produtos/foto", { method: "POST", body: dados });
+    if (minhaPesquisa !== numeroPesquisa) {
+      return;
+    }
+    // o nome reconhecido vai para o campo, para o usuário ajustar e pesquisar de novo se quiser
+    campoNome.value = resultado.nomeReconhecido;
+    dominioAtual = null;
+    mostrarResultados(resultado.produtos, "Produto reconhecido: " + resultado.nomeReconhecido + ". ");
+  } catch (e) {
+    if (minhaPesquisa !== numeroPesquisa) {
+      return;
+    }
+    mostrarMensagem(e.message, true); // inclui o aviso do REQ 5 quando a foto não é identificada
+  } finally {
+    botaoFoto.disabled = false;
+  }
+}
+
+// mostra a lista; "prefixo" vai antes da contagem (ex.: o nome reconhecido na foto)
+function mostrarResultados(produtos, prefixo) {
+  // separa quem tem oferta de quem não tem; a ordem que veio da API é mantida
+  const comOfertas = produtos.filter((p) => p.quantidadeOfertas > 0 && p.menorPreco != null);
+  const semOfertas = produtos.filter((p) => !(p.quantidadeOfertas > 0 && p.menorPreco != null));
+
+  if (comOfertas.length === 0) {
+    mostrarMensagem(prefixo + (semOfertas.length === 0
+        ? "Não encontramos produtos para essa pesquisa. Tente outro termo ou outra categoria."
+        : "Não encontramos ofertas para essa pesquisa no momento."));
+  } else {
+    mostrarMensagem(prefixo + comOfertas.length + (comOfertas.length === 1 ? " produto encontrado" : " produtos encontrados"));
+    comOfertas.forEach((produto) => listaResultados.appendChild(criarCard(produto)));
+  }
+
+  if (semOfertas.length > 0) {
+    areaSemOfertas.appendChild(criarSecaoSemOfertas(semOfertas));
   }
 }
 

@@ -26,8 +26,8 @@ Comparador de preços: o usuário pesquisa um produto pelo nome, por voz ou por 
 
 | Item | Requisito | Status |
 |---|---|---|
-| UC02 Reconhecer o produto por foto | REQ 2 | Em andamento: contrato do reconhecedor e versão simulada prontos; falta escolher o serviço de IA |
-| Avisar quando a foto não for identificada | REQ 5 | Em andamento: o reconhecedor já indica quando não reconhece; falta a mensagem na tela |
+| UC02 Reconhecer o produto por foto | REQ 2 | Fluxo completo pronto (envio da foto, validação, pesquisa e tela) com reconhecimento simulado; falta ligar o serviço de IA escolhido |
+| Avisar quando a foto não for identificada | REQ 5 | Pronto: a API responde 422 com a mensagem e a tela mostra o aviso |
 
 ### Extra
 
@@ -46,7 +46,7 @@ O sistema adota uma arquitetura em camadas, em `Codigos/br/mackenzie/chorameliga
 | `dto` | Dados prontos para a tela (`ProdutoResumo`, `DetalhesProduto`, `OfertaDetalhe`) |
 | `catalogo` | Origem dos produtos e ofertas (`FonteCatalogo`): Mercado Livre ou dados simulados |
 | `fonte` | Origem da atualização de preços (`FontePrecos`) |
-| `reconhecimento` | Reconhecimento de produto por foto (`ReconhecedorFoto`), hoje com versão simulada |
+| `reconhecimento` | Reconhecimento de produto por foto (`ReconhecedorFoto`) e validação do formato da imagem; hoje com reconhecimento simulado |
 | `config` | Configuração dos componentes do Spring |
 
 A tela fica em `src/main/resources/static/` (HTML, CSS e JavaScript, sem framework).
@@ -59,6 +59,7 @@ Os testes ficam em `CodigosTest/`, espelhando a mesma estrutura.
 |---|---|---|
 | GET | `/api/produtos?nome=...&dominio=...` | Pesquisa produtos pelo nome; `dominio` (opcional) filtra pela categoria do Mercado Livre, ex.: `MLB-CELLPHONES` |
 | GET | `/api/produtos/{id}` | Detalhes de um produto com as ofertas das lojas |
+| POST | `/api/produtos/foto` | Pesquisa por foto (multipart, campo `foto`; JPG, PNG ou WEBP até 5 MB). Responde o nome reconhecido e os produtos; 422 se a foto não for identificada, 503 se o reconhecimento estiver fora do ar |
 
 ## Tecnologias
 
@@ -80,7 +81,7 @@ mvn spring-boot:run
 
 Depois abra http://localhost:8080.
 
-Sem configuração, o sistema usa dados simulados (ex.: pesquise "Galaxy S23"). Para usar o Mercado Livre, defina as variáveis de ambiente antes de rodar:
+Sem configuração, o sistema usa dados simulados (ex.: pesquise "Galaxy S23"). Enquanto a IA não é escolhida, toda foto válida é reconhecida como "Galaxy S23". Para usar o Mercado Livre, defina as variáveis de ambiente antes de rodar:
 
 | Variável | Obrigatória | Descrição |
 |---|---|---|

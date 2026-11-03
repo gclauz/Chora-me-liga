@@ -6,8 +6,12 @@ import br.mackenzie.chorameliga.catalogo.FonteCatalogo;
 import br.mackenzie.chorameliga.catalogo.FonteCatalogoFake;
 import br.mackenzie.chorameliga.catalogo.MercadoLivreAuth;
 import br.mackenzie.chorameliga.catalogo.MercadoLivreFonte;
+import br.mackenzie.chorameliga.reconhecimento.ProdutoReconhecido;
+import br.mackenzie.chorameliga.reconhecimento.ReconhecedorFoto;
+import br.mackenzie.chorameliga.reconhecimento.ReconhecedorFotoFake;
 import br.mackenzie.chorameliga.repository.ProdutoRepository;
 import br.mackenzie.chorameliga.service.ImportacaoCatalogoService;
+import br.mackenzie.chorameliga.service.PesquisaPorFotoService;
 import br.mackenzie.chorameliga.service.ProdutoService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,6 +52,19 @@ public class AppConfig {
     @Bean
     public ProdutoService produtoService(ProdutoRepository repositorio, ImportacaoCatalogoService importacao) {
         return new ProdutoService(repositorio, importacao);
+    }
+
+    // Ainda não há IA escolhida: toda foto válida é "reconhecida" como o produto de exemplo.
+    // Quando houver, fica igual ao Mercado Livre: com a chave no ambiente usa a IA; sem ela, o fake.
+    @Bean
+    public ReconhecedorFoto reconhecedorFoto() {
+        log.warn("Reconhecimento de foto simulado: toda foto será reconhecida como \"Galaxy S23\".");
+        return ReconhecedorFotoFake.sempreReconhece(new ProdutoReconhecido("Galaxy S23", "MLB-CELLPHONES"));
+    }
+
+    @Bean
+    public PesquisaPorFotoService pesquisaPorFotoService(ReconhecedorFoto reconhecedor, ProdutoService produtoService) {
+        return new PesquisaPorFotoService(reconhecedor, produtoService);
     }
 
     private static boolean vazio(String valor) {
