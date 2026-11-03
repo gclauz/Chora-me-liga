@@ -11,7 +11,7 @@
     <a href="/" class="logo">Chora<span>Me</span>Liga</a>
     <nav class="menu">
       <a href="/" class="ativo">Início</a>
-      <span class="em-breve" title="Disponível em breve">Favoritos</span>
+      <a href="#" id="menu-favoritos">Favoritos</a>
     </nav>
   </header>
 
@@ -59,7 +59,60 @@
     </section>
 
     <section id="tela-resultados" hidden>
+      <div id="filtros" class="filtros" hidden>
+        <label class="filtro">Ordenar por
+          <select id="filtro-ordem">
+            <option value="relevancia">Relevância</option>
+            <option value="menor-preco">Menor preço</option>
+            <option value="maior-preco">Maior preço</option>
+            <option value="mais-ofertas">Mais ofertas</option>
+          </select>
+        </label>
+        <label class="filtro">Preço de
+          <input id="filtro-min" type="number" min="0" step="any" inputmode="decimal" placeholder="mín.">
+        </label>
+        <label class="filtro">até
+          <input id="filtro-max" type="number" min="0" step="any" inputmode="decimal" placeholder="máx.">
+        </label>
+        <button type="button" id="botao-limpar-filtros" class="link-discreto">Limpar filtros</button>
+      </div>
       <div id="lista-resultados" class="grade"></div>
+    </section>
+
+    <section id="tela-favoritos" hidden>
+      <button type="button" id="botao-voltar-favoritos" class="link-voltar">← Voltar</button>
+      <h2 class="titulo-pagina">Meus favoritos</h2>
+      <p class="subtitulo-pagina">Os favoritos ficam salvos neste navegador. O preço mostrado é o da última vez que você viu o produto ou a oferta.</p>
+      <div id="filtros-favoritos" class="filtros" hidden>
+        <label class="filtro">Buscar
+          <input id="filtro-fav-texto" type="search" class="filtro-texto" placeholder="produto ou loja">
+        </label>
+        <label class="filtro">Mostrar
+          <select id="filtro-fav-tipo">
+            <option value="todos">Produtos e ofertas</option>
+            <option value="produtos">Só produtos</option>
+            <option value="ofertas">Só ofertas</option>
+          </select>
+        </label>
+        <label class="filtro">Categoria
+          <select id="filtro-fav-categoria">
+            <option value="">Todas</option>
+          </select>
+        </label>
+        <label class="filtro">Ordenar por
+          <select id="filtro-fav-ordem">
+            <option value="recentes">Adicionados recentemente</option>
+            <option value="menor-preco">Menor preço</option>
+            <option value="maior-preco">Maior preço</option>
+            <option value="nome">Nome (A-Z)</option>
+          </select>
+        </label>
+        <button type="button" id="botao-limpar-filtros-favoritos" class="link-discreto">Limpar filtros</button>
+      </div>
+      <h3 id="titulo-favoritos-produtos" class="titulo-secao">Produtos</h3>
+      <div id="lista-favoritos" class="grade"></div>
+      <h3 id="titulo-favoritos-ofertas" class="titulo-secao">Ofertas</h3>
+      <div id="lista-ofertas-favoritas" class="ofertas"></div>
     </section>
 
     <section id="tela-detalhes" hidden>
