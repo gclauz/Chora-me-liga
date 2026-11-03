@@ -56,6 +56,70 @@ document.querySelectorAll(".categoria").forEach((botao) => {
 
 botaoVoltar.addEventListener("click", () => mostrarTela("resultados"));
 
+// ---------- pesquisa por voz ----------
+
+// usa o reconhecimento de fala do próprio navegador (Chrome/Edge); sem suporte, o botão fica escondido
+const botaoVoz = document.getElementById("botao-voz");
+const Reconhecimento = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+if (Reconhecimento) {
+  const reconhecimento = new Reconhecimento();
+  reconhecimento.lang = "pt-BR";
+  reconhecimento.interimResults = false;
+  reconhecimento.maxAlternatives = 1;
+  let ouvindo = false;
+
+  botaoVoz.hidden = false;
+
+  botaoVoz.addEventListener("click", () => {
+    if (ouvindo) {
+      reconhecimento.stop();
+      return;
+    }
+    try {
+      reconhecimento.start();
+    } catch (e) {
+      // start() lança erro se já estiver ouvindo; nesse caso não há o que fazer
+    }
+  });
+
+  reconhecimento.addEventListener("start", () => {
+    ouvindo = true;
+    botaoVoz.classList.add("ouvindo");
+    mostrarMensagem("Ouvindo... fale o nome do produto.");
+  });
+
+  reconhecimento.addEventListener("end", () => {
+    ouvindo = false;
+    botaoVoz.classList.remove("ouvindo");
+  });
+
+  // o que foi falado vai para o campo e vira uma pesquisa livre, como se tivesse sido digitado
+  reconhecimento.addEventListener("result", (evento) => {
+    const falado = evento.results[0][0].transcript.trim().replace(/[.!?]+$/, "");
+    if (falado === "") {
+      mostrarMensagem("Não entendi o que foi falado. Tente de novo.", true);
+      return;
+    }
+    campoNome.value = falado;
+    dominioAtual = null;
+    pesquisar(falado, null);
+  });
+
+  reconhecimento.addEventListener("error", (evento) => {
+    const mensagens = {
+      "no-speech": "Não ouvi nada. Clique no microfone e fale o nome do produto.",
+      "not-allowed": "O navegador bloqueou o microfone. Libere o acesso para pesquisar por voz.",
+      "service-not-allowed": "O navegador bloqueou o microfone. Libere o acesso para pesquisar por voz.",
+      "audio-capture": "Nenhum microfone foi encontrado.",
+      "network": "Sem conexão com o serviço de voz do navegador. Tente digitar o nome."
+    };
+    if (evento.error !== "aborted") {
+      mostrarMensagem(mensagens[evento.error] || "Não foi possível usar a pesquisa por voz.", true);
+    }
+  });
+}
+
 // ---------- telas ----------
 
 // "inicio" = busca + categorias; "resultados" = busca + lista; "detalhes" = só o produto
