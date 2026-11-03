@@ -35,6 +35,13 @@ Comparador de preços: o usuário pesquisa um produto pelo nome, por voz ou por 
 |---|---|---|
 | UC04 Histórico de pesquisas | REQ-04 | Pronto no navegador: as 10 pesquisas mais recentes (digitadas, por categoria, por voz e por foto) ficam na tela inicial e podem ser refeitas ou removidas. Ficam salvas no próprio navegador, sem login |
 
+### Adiantado da Sprint 4
+
+| Item | Requisito | Status |
+|---|---|---|
+| UC07 Filtros na busca | REQ-07 | Pronto: ordenar os resultados por relevância, menor preço, maior preço ou mais ofertas, e filtrar por faixa de preço (além das categorias); nos detalhes, ordenar as ofertas do produto por preço, frete ou loja |
+| UC08 Favoritos | REQ-08 | Pronto no navegador: dá para favoritar produtos e ofertas específicas de uma loja, e ver tudo na tela "Favoritos" do menu, com busca por nome ou loja, filtro por tipo e categoria e ordenação. Ficam salvos no próprio navegador, sem login |
+
 ### Extra
 
 - **Pesquisa por voz:** botão de microfone ao lado do campo de pesquisa. O nome falado vira texto e a pesquisa é feita automaticamente. Usa o reconhecimento de fala do navegador (Chrome e Edge); em navegadores sem suporte o botão não aparece.
@@ -110,6 +117,12 @@ A pesquisa por voz precisa de Chrome ou Edge, de acesso ao microfone e de intern
 ```bash
 mvn clean test
 ```
+
+## Uso de inteligência artificial
+
+Este projeto foi desenvolvido com o auxílio de ferramentas de inteligência artificial, usadas para apoiar a escrita de código, de testes automatizados e desta documentação.
+
+Todo o conteúdo gerado com ajuda da IA foi revisado, testado e aprovado pela equipe, que é responsável pelas decisões do projeto e pelo resultado final.
 
 ## Fluxo de trabalho
 
