@@ -34,6 +34,7 @@ formulario.addEventListener("submit", (evento) => {
     mostrarMensagem("Digite o nome de um produto.", true);
     return;
   }
+  registrarNoHistorico(nome, dominioAtual, dominioAtual ? "categoria" : "texto");
   pesquisar(nome, dominioAtual);
 });
 
@@ -50,11 +51,117 @@ document.querySelectorAll(".categoria").forEach((botao) => {
   botao.addEventListener("click", () => {
     campoNome.value = botao.dataset.termo;
     dominioAtual = botao.dataset.dominio || null;
+    registrarNoHistorico(botao.dataset.termo, dominioAtual, "categoria");
     pesquisar(botao.dataset.termo, dominioAtual);
   });
 });
 
 botaoVoltar.addEventListener("click", () => mostrarTela("resultados"));
+
+// ---------- histórico de pesquisas (REQ-04 / UC04) ----------
+
+// Guardado no próprio navegador (localStorage): cada navegador tem o seu, sem login.
+// Se o navegador bloquear o armazenamento (ex.: janela anônima), o site funciona igual, só sem histórico.
+const CHAVE_HISTORICO = "chorameliga.historico";
+const MAXIMO_HISTORICO = 10;
+const ORIGENS = {
+  texto: { icone: "🔍", nome: "pesquisa digitada" },
+  categoria: { icone: "🏷️", nome: "categoria" },
+  voz: { icone: "🎤", nome: "pesquisa por voz" },
+  foto: { icone: "📷", nome: "pesquisa por foto" }
+};
+const areaHistorico = document.getElementById("area-historico");
+const listaHistorico = document.getElementById("lista-historico");
+
+function lerHistorico() {
+  try {
+    const salvo = JSON.parse(localStorage.getItem(CHAVE_HISTORICO) || "[]");
+    // descarta o que não tiver o formato esperado (ex.: dado antigo ou editado à mão)
+    return Array.isArray(salvo)
+        ? salvo.filter((item) => item && typeof item.nome === "string" && item.nome.trim() !== "")
+        : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function salvarHistorico(itens) {
+  try {
+    localStorage.setItem(CHAVE_HISTORICO, JSON.stringify(itens));
+  } catch (e) {
+    // armazenamento bloqueado ou cheio: o histórico só não fica salvo
+  }
+}
+
+function mesmaPesquisa(a, b) {
+  return a.nome.toLowerCase() === b.nome.toLowerCase() && (a.dominio || null) === (b.dominio || null);
+}
+
+// a pesquisa mais recente vai para o topo; repetir uma pesquisa só a move para cima
+function registrarNoHistorico(nome, dominio, origem) {
+  const novo = { nome: nome.trim(), dominio: dominio || null, origem, quando: Date.now() };
+  const itens = lerHistorico().filter((item) => !mesmaPesquisa(item, novo));
+  itens.unshift(novo);
+  salvarHistorico(itens.slice(0, MAXIMO_HISTORICO));
+  mostrarHistorico();
+}
+
+function removerDoHistorico(alvo) {
+  salvarHistorico(lerHistorico().filter((item) => !mesmaPesquisa(item, alvo)));
+  mostrarHistorico();
+}
+
+function mostrarHistorico() {
+  const itens = lerHistorico();
+  limpar(listaHistorico);
+  areaHistorico.hidden = itens.length === 0;
+
+  itens.forEach((item) => {
+    const origem = Object.hasOwn(ORIGENS, item.origem) ? ORIGENS[item.origem] : ORIGENS.texto;
+    const li = criar("li", "historico-item");
+
+    const botao = criar("button", "historico-pesquisar");
+    botao.type = "button";
+    botao.title = "Pesquisar de novo (" + origem.nome + formatarQuando(item.quando) + ")";
+    botao.appendChild(criar("span", "historico-icone", origem.icone));
+    botao.appendChild(criar("span", "historico-nome", item.nome));
+    const categoria = nomeDaCategoria(item.dominio);
+    if (categoria !== "") {
+      botao.appendChild(criar("span", "historico-detalhe", "em " + categoria));
+    }
+    // refaz a pesquisa pelo nome; a de foto também, porque a foto não fica guardada
+    botao.addEventListener("click", () => {
+      campoNome.value = item.nome;
+      dominioAtual = item.dominio || null;
+      registrarNoHistorico(item.nome, item.dominio, item.origem);
+      pesquisar(item.nome, dominioAtual);
+    });
+
+    const remover = criar("button", "historico-remover", "×");
+    remover.type = "button";
+    remover.title = "Remover do histórico";
+    remover.setAttribute("aria-label", "Remover " + item.nome + " do histórico");
+    remover.addEventListener("click", () => removerDoHistorico(item));
+
+    li.appendChild(botao);
+    li.appendChild(remover);
+    listaHistorico.appendChild(li);
+  });
+}
+
+function formatarQuando(quando) {
+  if (typeof quando !== "number") {
+    return "";
+  }
+  return ", " + new Date(quando).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" });
+}
+
+document.getElementById("botao-limpar-historico").addEventListener("click", () => {
+  salvarHistorico([]);
+  mostrarHistorico();
+});
+
+mostrarHistorico();
 
 // ---------- pesquisa por foto ----------
 
@@ -66,11 +173,6 @@ const TAMANHO_MAXIMO_FOTO = 5 * 1024 * 1024; // mesmo limite do servidor
 let urlPrevia = null;
 
 botaoFoto.addEventListener("click", () => campoFoto.click());
-
-document.getElementById("menu-foto").addEventListener("click", (evento) => {
-  evento.preventDefault();
-  campoFoto.click();
-});
 
 campoFoto.addEventListener("change", () => {
   const arquivo = campoFoto.files[0];
@@ -145,6 +247,7 @@ if (Reconhecimento) {
     }
     campoNome.value = falado;
     dominioAtual = null;
+    registrarNoHistorico(falado, null, "voz");
     pesquisar(falado, null);
   });
 
@@ -252,6 +355,8 @@ async function pesquisarPorFoto(arquivo) {
     // o nome reconhecido vai para o campo, para o usuário ajustar e pesquisar de novo se quiser
     campoNome.value = resultado.nomeReconhecido;
     dominioAtual = null;
+    // a foto em si não é guardada: o histórico guarda o nome reconhecido
+    registrarNoHistorico(resultado.nomeReconhecido, null, "foto");
     mostrarResultados(resultado.produtos, "Produto reconhecido: " + resultado.nomeReconhecido + ". ");
   } catch (e) {
     if (minhaPesquisa !== numeroPesquisa) {

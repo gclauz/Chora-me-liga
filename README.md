@@ -29,6 +29,12 @@ Comparador de preços: o usuário pesquisa um produto pelo nome, por voz ou por 
 | UC02 Reconhecer o produto por foto | REQ 2 | Fluxo completo pronto (envio da foto, validação, pesquisa e tela) com reconhecimento simulado; falta ligar o serviço de IA escolhido |
 | Avisar quando a foto não for identificada | REQ 5 | Pronto: a API responde 422 com a mensagem e a tela mostra o aviso |
 
+### Adiantado da Sprint 3
+
+| Item | Requisito | Status |
+|---|---|---|
+| UC04 Histórico de pesquisas | REQ-04 | Pronto no navegador: as 10 pesquisas mais recentes (digitadas, por categoria, por voz e por foto) ficam na tela inicial e podem ser refeitas ou removidas. Ficam salvas no próprio navegador, sem login |
+
 ### Extra
 
 - **Pesquisa por voz:** botão de microfone ao lado do campo de pesquisa. O nome falado vira texto e a pesquisa é feita automaticamente. Usa o reconhecimento de fala do navegador (Chrome e Edge); em navegadores sem suporte o botão não aparece.
