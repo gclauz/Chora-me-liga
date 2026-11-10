@@ -5,6 +5,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.net.http.HttpTimeoutException;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Map;
@@ -63,8 +64,13 @@ public class ClienteHttpJava implements ClienteHttp {
                 throw new RespostaHttpException(resposta.statusCode(), resposta.body());
             }
             return resposta.body();
+        } catch (HttpTimeoutException e) {
+            long segundos = requisicao.timeout().map(Duration::toSeconds).orElse(0L);
+            throw new FonteIndisponivelException("A API não respondeu dentro do prazo de " + segundos + " s.", e);
         } catch (IOException e) {
-            throw new FonteIndisponivelException("Falha de rede ao chamar a API.", e);
+            // ex.: ConnectException (sem internet ou conexão recusada), SSLException (problema no HTTPS)
+            throw new FonteIndisponivelException("Falha de rede ao chamar a API ("
+                    + e.getClass().getSimpleName() + (e.getMessage() == null ? "" : ": " + e.getMessage()) + ").", e);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new FonteIndisponivelException("Chamada à API interrompida.", e);
