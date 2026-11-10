@@ -43,6 +43,16 @@ public class ClienteHttpFake implements ClienteHttp {
         return resposta(url);
     }
 
+    public Map<String, String> ultimosCabecalhos;
+
+    @Override
+    public String postJson(String url, String corpoJson, Map<String, String> cabecalhos) {
+        chamadas.add("POST " + url);
+        ultimoCorpo = corpoJson;
+        ultimosCabecalhos = cabecalhos;
+        return resposta(url);
+    }
+
     private String resposta(String url) {
         for (String trecho : falhas) {
             if (url.contains(trecho)) {

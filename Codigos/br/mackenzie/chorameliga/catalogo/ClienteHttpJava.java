@@ -7,6 +7,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
+import java.util.Map;
 
 // Implementação real, com o HttpClient que já vem no Java.
 public class ClienteHttpJava implements ClienteHttp {
@@ -38,13 +39,28 @@ public class ClienteHttpJava implements ClienteHttp {
         return enviar(requisicao);
     }
 
+    // Prazo maior que o das outras chamadas (enviar uma foto e a IA analisar demora mais),
+    // mas curto o bastante para o usuário não ficar preso na tela esperando.
+    @Override
+    public String postJson(String url, String corpoJson, Map<String, String> cabecalhos) {
+        HttpRequest.Builder requisicao = HttpRequest.newBuilder(URI.create(url))
+                .timeout(Duration.ofSeconds(25))
+                .header("Content-Type", "application/json")
+                .header("Accept", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(corpoJson, StandardCharsets.UTF_8));
+        if (cabecalhos != null) {
+            cabecalhos.forEach(requisicao::header);
+        }
+        return enviar(requisicao.build());
+    }
+
     private String enviar(HttpRequest requisicao) {
         try {
             // lê a resposta como UTF-8, o que evita os acentos quebrados que vimos no PowerShell
             HttpResponse<String> resposta = cliente.send(requisicao,
                     HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
             if (resposta.statusCode() < 200 || resposta.statusCode() >= 300) {
-                throw new RespostaHttpException(resposta.statusCode());
+                throw new RespostaHttpException(resposta.statusCode(), resposta.body());
             }
             return resposta.body();
         } catch (IOException e) {
