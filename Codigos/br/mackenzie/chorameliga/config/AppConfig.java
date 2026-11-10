@@ -6,6 +6,7 @@ import br.mackenzie.chorameliga.catalogo.FonteCatalogo;
 import br.mackenzie.chorameliga.catalogo.FonteCatalogoFake;
 import br.mackenzie.chorameliga.catalogo.MercadoLivreAuth;
 import br.mackenzie.chorameliga.catalogo.MercadoLivreFonte;
+import br.mackenzie.chorameliga.reconhecimento.GeminiReconhecedor;
 import br.mackenzie.chorameliga.reconhecimento.ProdutoReconhecido;
 import br.mackenzie.chorameliga.reconhecimento.ReconhecedorFoto;
 import br.mackenzie.chorameliga.reconhecimento.ReconhecedorFotoFake;
@@ -54,12 +55,27 @@ public class AppConfig {
         return new ProdutoService(repositorio, importacao);
     }
 
-    // Ainda não há IA escolhida: toda foto válida é "reconhecida" como o produto de exemplo.
-    // Quando houver, fica igual ao Mercado Livre: com a chave no ambiente usa a IA; sem ela, o fake.
+    // Igual ao Mercado Livre: com a chave do Gemini no ambiente usa a IA; sem ela, o reconhecimento
+    // simulado (toda foto válida vira "Galaxy S23"), para o projeto e os testes rodarem sem segredo.
     @Bean
     public ReconhecedorFoto reconhecedorFoto() {
-        log.warn("Reconhecimento de foto simulado: toda foto será reconhecida como \"Galaxy S23\".");
-        return ReconhecedorFotoFake.sempreReconhece(new ProdutoReconhecido("Galaxy S23", "MLB-CELLPHONES"));
+        String chave = System.getenv("GEMINI_API_KEY");
+        if (vazio(chave)) {
+            log.warn("GEMINI_API_KEY não definida: reconhecimento de foto simulado (toda foto vira \"Galaxy S23\").");
+            return ReconhecedorFotoFake.sempreReconhece(new ProdutoReconhecido("Galaxy S23", "MLB-CELLPHONES"));
+        }
+        // ambos opcionais; GEMINI_MODELO_RESERVA=nenhum desliga a reserva
+        String reserva = System.getenv("GEMINI_MODELO_RESERVA");
+        if (vazio(reserva)) {
+            reserva = GeminiReconhecedor.MODELO_RESERVA_PADRAO;
+        } else if (reserva.trim().equalsIgnoreCase("nenhum")) {
+            reserva = null;
+        }
+        GeminiReconhecedor gemini = new GeminiReconhecedor(
+                new ClienteHttpJava(), chave, System.getenv("GEMINI_MODELO"), reserva);
+        log.info("Reconhecimento de foto com o Gemini (modelo {}, reserva {}).",
+                gemini.getModelo(), gemini.getModeloReserva() == null ? "nenhuma" : gemini.getModeloReserva());
+        return gemini;
     }
 
     @Bean

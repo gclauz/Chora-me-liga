@@ -22,11 +22,11 @@ Comparador de preços: o usuário pesquisa um produto pelo nome, por voz ou por 
 | Integração com a API do Mercado Livre | — | Pronta (produtos, ofertas e filtro por categoria) |
 | Entrega automática (CI) | REQ 11 | Testes rodam no GitHub Actions a cada push e pull request |
 
-### Sprint 2 (em andamento)
+### Sprint 2 (concluída)
 
 | Item | Requisito | Status |
 |---|---|---|
-| UC02 Reconhecer o produto por foto | REQ 2 | Fluxo completo pronto (envio da foto, validação, pesquisa e tela) com reconhecimento simulado; falta ligar o serviço de IA escolhido |
+| UC02 Reconhecer o produto por foto | REQ 2 | Pronto: a foto é analisada pelo Gemini (Google), que devolve o nome e a categoria do produto para a pesquisa; sem a chave configurada, usa o reconhecimento simulado |
 | Avisar quando a foto não for identificada | REQ 5 | Pronto: a API responde 422 com a mensagem e a tela mostra o aviso |
 
 ### Adiantado da Sprint 3
@@ -59,7 +59,7 @@ O sistema adota uma arquitetura em camadas, em `Codigos/br/mackenzie/chorameliga
 | `dto` | Dados prontos para a tela (`ProdutoResumo`, `DetalhesProduto`, `OfertaDetalhe`) |
 | `catalogo` | Origem dos produtos e ofertas (`FonteCatalogo`): Mercado Livre ou dados simulados |
 | `fonte` | Origem da atualização de preços (`FontePrecos`) |
-| `reconhecimento` | Reconhecimento de produto por foto (`ReconhecedorFoto`) e validação do formato da imagem; hoje com reconhecimento simulado |
+| `reconhecimento` | Reconhecimento de produto por foto (`ReconhecedorFoto`): com o Gemini (`GeminiReconhecedor`) ou simulado; e validação do formato da imagem |
 | `config` | Configuração dos componentes do Spring |
 
 A tela fica em `src/main/resources/static/` (HTML, CSS e JavaScript, sem framework).
@@ -82,6 +82,7 @@ Os testes ficam em `CodigosTest/`, espelhando a mesma estrutura.
 - JUnit 5
 - HTML, CSS e JavaScript
 - API do Mercado Livre
+- API do Gemini (Google), para reconhecer produtos em fotos
 - GitHub Actions
 
 ## Como rodar
@@ -94,21 +95,29 @@ mvn spring-boot:run
 
 Depois abra http://localhost:8080.
 
-Sem configuração, o sistema usa dados simulados (ex.: pesquise "Galaxy S23"). Enquanto a IA não é escolhida, toda foto válida é reconhecida como "Galaxy S23". Para usar o Mercado Livre, defina as variáveis de ambiente antes de rodar:
+Sem configuração, o sistema usa dados simulados (ex.: pesquise "Galaxy S23") e toda foto válida é reconhecida como "Galaxy S23". Para usar os serviços reais, defina as variáveis de ambiente antes de rodar:
 
 | Variável | Obrigatória | Descrição |
 |---|---|---|
-| `ML_CLIENT_ID` | Sim | ID do aplicativo no Mercado Livre |
-| `ML_CLIENT_SECRET` | Sim | Segredo do aplicativo no Mercado Livre |
+| `ML_CLIENT_ID` | Para usar o Mercado Livre | ID do aplicativo no Mercado Livre |
+| `ML_CLIENT_SECRET` | Para usar o Mercado Livre | Segredo do aplicativo no Mercado Livre |
 | `ML_DOMINIO` | Não | Limita as pesquisas a uma categoria, ex.: `MLB-CELLPHONES` |
+| `GEMINI_API_KEY` | Para usar o Gemini | Chave da API do Gemini, criada no Google AI Studio |
+| `GEMINI_MODELO` | Não | Modelo do Gemini usado nas fotos (padrão: `gemini-3.5-flash-lite`) |
+| `GEMINI_MODELO_RESERVA` | Não | Modelo usado quando o principal está sobrecarregado, sem cota ou indisponível (padrão: `gemini-3.8-flash`; `nenhum` desliga a reserva) |
+
+No plano gratuito do Gemini (novembro de 2026), o `gemini-3.5-flash-lite` permite 500 pedidos por dia e o `gemini-3.8-flash`, 20. Cada foto enviada gasta pelo menos um pedido.
 
 No PowerShell:
 
 ```powershell
 $env:ML_CLIENT_ID = "seu_id"
 $env:ML_CLIENT_SECRET = "seu_segredo"
+$env:GEMINI_API_KEY = "sua_chave"
 mvn spring-boot:run
 ```
+
+As chaves nunca devem ir para o código nem para o GitHub. As fotos da pesquisa por foto são enviadas ao Google para análise; no plano gratuito do Gemini, o Google pode usar esses dados para melhorar os seus produtos.
 
 A pesquisa por voz precisa de Chrome ou Edge, de acesso ao microfone e de internet, e só funciona em `localhost` ou em HTTPS.
 
