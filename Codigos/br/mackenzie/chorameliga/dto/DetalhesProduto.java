@@ -9,7 +9,8 @@ public record DetalhesProduto(
         String categoria,
         String descricao,
         List<OfertaDetalhe> ofertas,
-        Double menorPrecoAtual,      
-        Double menorPrecoHistorico   
+        Double menorPrecoAtual,
+        Double menorPrecoHistorico,
+        List<HistoricoLoja> historico // vazio se o produto ainda não tem preços gravados
 ) {
 }

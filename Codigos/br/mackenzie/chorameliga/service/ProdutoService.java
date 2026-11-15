@@ -1,15 +1,21 @@
 package br.mackenzie.chorameliga.service;
 
 import br.mackenzie.chorameliga.dto.DetalhesProduto;
+import br.mackenzie.chorameliga.dto.HistoricoLoja;
 import br.mackenzie.chorameliga.dto.OfertaDetalhe;
+import br.mackenzie.chorameliga.dto.PontoPreco;
 import br.mackenzie.chorameliga.dto.ProdutoResumo;
+import br.mackenzie.chorameliga.historico.RegistroPreco;
 import br.mackenzie.chorameliga.model.Oferta;
 import br.mackenzie.chorameliga.model.Produto;
 import br.mackenzie.chorameliga.repository.ProdutoRepository;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 public class ProdutoService {
@@ -19,17 +25,24 @@ public class ProdutoService {
 
     private final ProdutoRepository repositorio;
     private final ImportacaoCatalogoService importacao; // pode ser null (só busca no repositório)
+    private final HistoricoPrecoService historico;      // pode ser null (detalhes sem histórico)
 
     public ProdutoService(ProdutoRepository repositorio) {
         this(repositorio, null);
     }
 
     public ProdutoService(ProdutoRepository repositorio, ImportacaoCatalogoService importacao) {
+        this(repositorio, importacao, null);
+    }
+
+    public ProdutoService(ProdutoRepository repositorio, ImportacaoCatalogoService importacao,
+                          HistoricoPrecoService historico) {
         if (repositorio == null) {
             throw new IllegalArgumentException("O repositório é obrigatório.");
         }
         this.repositorio = repositorio;
         this.importacao = importacao;
+        this.historico = historico;
     }
 
     // UC01 - Pesquisar produto manualmente
@@ -96,10 +109,18 @@ public class ProdutoService {
                 .map(Oferta::getPreco)
                 .orElse(null);
 
+        // UC09: preços gravados no banco (de pesquisas anteriores, mesmo antes de o servidor reiniciar)
+        List<RegistroPreco> registros = historico == null ? List.of() : historico.listar(produto);
+
         Double menorPrecoHistorico = produto.getOfertas().stream()
                 .map(Oferta::getMenorPrecoHistorico)
                 .min(Comparator.naturalOrder())
                 .orElse(null);
+        for (RegistroPreco r : registros) {
+            if (menorPrecoHistorico == null || r.preco() < menorPrecoHistorico) {
+                menorPrecoHistorico = r.preco();
+            }
+        }
 
         return new DetalhesProduto(
                 produto.getId(),
@@ -108,8 +129,23 @@ public class ProdutoService {
                 produto.getDescricao(),
                 ofertas,
                 menorPrecoAtual,
-                menorPrecoHistorico
+                menorPrecoHistorico,
+                agruparPorLoja(registros)
         );
+    }
+
+    // uma série por loja, na ordem em que cada loja apareceu no histórico
+    private List<HistoricoLoja> agruparPorLoja(List<RegistroPreco> registros) {
+        Map<String, String> nomes = new LinkedHashMap<>();
+        Map<String, List<PontoPreco>> pontos = new LinkedHashMap<>();
+        for (RegistroPreco r : registros) {
+            String chave = r.loja().toLowerCase(Locale.ROOT);
+            nomes.putIfAbsent(chave, r.loja());
+            pontos.computeIfAbsent(chave, k -> new ArrayList<>()).add(new PontoPreco(r.data(), r.preco()));
+        }
+        return nomes.entrySet().stream()
+                .map(e -> new HistoricoLoja(e.getValue(), List.copyOf(pontos.get(e.getKey()))))
+                .toList();
     }
 
     // domínio em branco = sem filtro; fora do formato = erro (vira 400 na API)

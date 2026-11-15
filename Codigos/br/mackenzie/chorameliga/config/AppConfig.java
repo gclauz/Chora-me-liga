@@ -6,11 +6,14 @@ import br.mackenzie.chorameliga.catalogo.FonteCatalogo;
 import br.mackenzie.chorameliga.catalogo.FonteCatalogoFake;
 import br.mackenzie.chorameliga.catalogo.MercadoLivreAuth;
 import br.mackenzie.chorameliga.catalogo.MercadoLivreFonte;
+import br.mackenzie.chorameliga.historico.HistoricoPrecos;
+import br.mackenzie.chorameliga.historico.HistoricoPrecosJdbc;
 import br.mackenzie.chorameliga.reconhecimento.GeminiReconhecedor;
 import br.mackenzie.chorameliga.reconhecimento.ProdutoReconhecido;
 import br.mackenzie.chorameliga.reconhecimento.ReconhecedorFoto;
 import br.mackenzie.chorameliga.reconhecimento.ReconhecedorFotoFake;
 import br.mackenzie.chorameliga.repository.ProdutoRepository;
+import br.mackenzie.chorameliga.service.HistoricoPrecoService;
 import br.mackenzie.chorameliga.service.ImportacaoCatalogoService;
 import br.mackenzie.chorameliga.service.PesquisaPorFotoService;
 import br.mackenzie.chorameliga.service.ProdutoService;
@@ -18,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 @Configuration
 public class AppConfig {
@@ -45,14 +49,27 @@ public class AppConfig {
         return new MercadoLivreFonte(http, new MercadoLivreAuth(http, id, segredo), dominio);
     }
 
+    // O banco vem do application.properties: H2 em arquivo no computador, PostgreSQL na nuvem
     @Bean
-    public ImportacaoCatalogoService importacaoCatalogoService(ProdutoRepository repositorio, FonteCatalogo fonte) {
-        return new ImportacaoCatalogoService(repositorio, fonte);
+    public HistoricoPrecos historicoPrecos(JdbcTemplate jdbc) {
+        return new HistoricoPrecosJdbc(jdbc);
     }
 
     @Bean
-    public ProdutoService produtoService(ProdutoRepository repositorio, ImportacaoCatalogoService importacao) {
-        return new ProdutoService(repositorio, importacao);
+    public HistoricoPrecoService historicoPrecoService(HistoricoPrecos historico) {
+        return new HistoricoPrecoService(historico);
+    }
+
+    @Bean
+    public ImportacaoCatalogoService importacaoCatalogoService(ProdutoRepository repositorio, FonteCatalogo fonte,
+                                                               HistoricoPrecoService historico) {
+        return new ImportacaoCatalogoService(repositorio, fonte, historico);
+    }
+
+    @Bean
+    public ProdutoService produtoService(ProdutoRepository repositorio, ImportacaoCatalogoService importacao,
+                                         HistoricoPrecoService historico) {
+        return new ProdutoService(repositorio, importacao, historico);
     }
 
     // Igual ao Mercado Livre: com a chave do Gemini no ambiente usa a IA; sem ela, o reconhecimento
