@@ -4,6 +4,10 @@ Projeto da disciplina Laboratório de Engenharia de Software, Ciência da Comput
 
 Comparador de preços: o usuário pesquisa um produto pelo nome, por voz ou por foto e vê em quais lojas ele é mais barato, com histórico de preços.
 
+**Acesse:** https://chora-me-liga.onrender.com
+
+O sistema está publicado no plano gratuito do Render: se ninguém acessou nos últimos minutos, a primeira abertura pode levar cerca de 1 minuto.
+
 ## Equipe
 
 - Caio Cesar Navarro Pugliese
