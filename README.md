@@ -166,6 +166,5 @@ Todo o conteúdo gerado com ajuda da IA foi revisado, testado e aprovado pela eq
 
 ## Fluxo de trabalho
 
-- Quadro Kanban: ![Quadro Kanban](Documentacao/Kanban2.png)
 - Cada funcionalidade é feita numa branch `feature/...` e entra na `main` por pull request.
 - O que entra na `main` é publicado automaticamente no Render.
