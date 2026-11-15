@@ -6,7 +6,6 @@ services:
     runtime: docker
     plan: free
     branch: main
-    healthCheckPath: /
     envVars:
       # PostgreSQL do Neon, no formato jdbc:postgresql://HOST/BANCO?sslmode=require
       - key: SPRING_DATASOURCE_URL

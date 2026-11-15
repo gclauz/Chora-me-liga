@@ -13,7 +13,10 @@ RUN mvn -B -q package -Dmaven.test.skip=true
 FROM eclipse-temurin:17-jre
 WORKDIR /app
 COPY --from=build /app/target/*.jar app.jar
-# o plano gratuito do Render tem 512 MB de memória: a JVM usa no máximo 75% disso
-ENV JAVA_TOOL_OPTIONS="-XX:MaxRAMPercentage=75 -XX:+UseSerialGC"
+# O plano gratuito do Render tem 512 MB de memória e uma fração de CPU. Por isso:
+# - heap de no máximo 55% da memória, deixando espaço para o resto da JVM (classes, threads, código compilado);
+# - TieredStopAtLevel=1: o Java compila menos otimizações pesadas, então sobe e responde antes com pouca CPU;
+# - pilha das threads e cache de código menores.
+ENV JAVA_TOOL_OPTIONS="-XX:MaxRAMPercentage=55 -XX:+UseSerialGC -XX:TieredStopAtLevel=1 -Xss512k -XX:ReservedCodeCacheSize=64m -XX:MaxMetaspaceSize=128m"
 EXPOSE 8080
 CMD ["java", "-jar", "app.jar"]
