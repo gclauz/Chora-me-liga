@@ -13,6 +13,8 @@ Comparador de preços: o usuário pesquisa um produto pelo nome, por voz ou por 
 
 ## Status
 
+Todos os requisitos planejados (REQ-01 a REQ-12) estão prontos.
+
 ### Sprint 1 (concluída)
 
 | Item | Requisito | Status |
@@ -20,35 +22,31 @@ Comparador de preços: o usuário pesquisa um produto pelo nome, por voz ou por 
 | UC01 Pesquisar produto pelo nome | REQ-01 | Pronto, com API e tela |
 | UC03 Ver detalhes e preços do produto | REQ-03 | Pronto, com API e tela |
 | Integração com a API do Mercado Livre | — | Pronta (produtos, ofertas e filtro por categoria) |
-| Entrega automática (CI) | REQ 11 | Testes rodam no GitHub Actions a cada push e pull request |
+| Código organizado no GitHub | REQ-10 | Cada funcionalidade numa branch, com pull request para a `main` |
+| Entrega automática (CI/CD) | REQ-11 | Testes rodam no GitHub Actions a cada push e pull request; o que entra na `main` é publicado na nuvem (Sprint 4) |
 
 ### Sprint 2 (concluída)
 
 | Item | Requisito | Status |
 |---|---|---|
-| UC02 Reconhecer o produto por foto | REQ 2 | Pronto: a foto é analisada pelo Gemini (Google), que devolve o nome e a categoria do produto para a pesquisa; sem a chave configurada, usa o reconhecimento simulado |
-| Avisar quando a foto não for identificada | REQ 5 | Pronto: a API responde 422 com a mensagem e a tela mostra o aviso |
+| UC02 Reconhecer o produto por foto | REQ-02 | Pronto: a foto é analisada pelo Gemini (Google), que devolve o nome e a categoria do produto para a pesquisa; sem a chave configurada, usa o reconhecimento simulado |
+| UC05 Avisar quando a foto não for identificada | REQ-05 | Pronto: a API responde 422 com a mensagem e a tela mostra o aviso |
 
-### Adiantado da Sprint 3
+### Sprint 3 (concluída)
 
 | Item | Requisito | Status |
 |---|---|---|
 | UC04 Histórico de pesquisas | REQ-04 | Pronto no navegador: as 10 pesquisas mais recentes (digitadas, por categoria, por voz e por foto) ficam na tela inicial e podem ser refeitas ou removidas. Ficam salvas no próprio navegador, sem login |
-
-### Adiantado da Sprint 4
-
-| Item | Requisito | Status |
-|---|---|---|
-| UC07 Filtros na busca | REQ-07 | Pronto: ordenar os resultados por relevância, menor preço, maior preço ou mais ofertas, e filtrar por faixa de preço (além das categorias); nos detalhes, ordenar as ofertas do produto por preço, frete ou loja |
-| UC08 Favoritos | REQ-08 | Pronto no navegador: dá para favoritar produtos e ofertas específicas de uma loja, e ver tudo na tela "Favoritos" do menu, com busca por nome ou loja, filtro por tipo e categoria e ordenação. Ficam salvos no próprio navegador, sem login |
-
-### Histórico de preços e publicação
-
-| Item | Requisito | Status |
-|---|---|---|
 | UC06 Atualizar preços | REQ-06 | Pronto: a cada pesquisa os preços vêm do Mercado Livre e, quando o preço de uma loja muda, o novo valor é gravado no banco com a data |
+| UC07 Filtros na busca | REQ-07 | Pronto: ordenar os resultados por relevância, menor preço, maior preço ou mais ofertas, e filtrar por faixa de preço (além das categorias); nos detalhes, ordenar as ofertas do produto por preço, frete ou loja |
+
+### Sprint 4 (concluída)
+
+| Item | Requisito | Status |
+|---|---|---|
+| UC08 Favoritos | REQ-08 | Pronto no navegador: dá para favoritar produtos e ofertas específicas de uma loja, e ver tudo na tela "Favoritos" do menu, com busca por nome ou loja, filtro por tipo e categoria e ordenação. Ficam salvos no próprio navegador, sem login |
 | UC09 Consultar histórico de preços | REQ-09 | Pronto: nos detalhes do produto, gráfico do preço de cada loja ao longo do tempo (passando o mouse mostra o preço de cada loja no dia), menor preço já registrado e a tabela com todos os registros. O histórico continua existindo quando o servidor reinicia |
-| Publicação na nuvem | — | Render (aplicação, via Docker) e Neon (banco PostgreSQL), ambos no plano gratuito |
+| Publicação na nuvem | REQ-12 | Pronta: aplicação no Render (via Docker) e banco PostgreSQL no Neon, ambos no plano gratuito; cada merge na `main` é publicado automaticamente |
 
 ### Extra
 
