@@ -21,13 +21,20 @@ public class ImportacaoCatalogoService {
 
     private final ProdutoRepository repositorio;
     private final FonteCatalogo fonte;
+    private final HistoricoPrecoService historico; // pode ser null (não grava o histórico)
 
     public ImportacaoCatalogoService(ProdutoRepository repositorio, FonteCatalogo fonte) {
+        this(repositorio, fonte, null);
+    }
+
+    public ImportacaoCatalogoService(ProdutoRepository repositorio, FonteCatalogo fonte,
+                                     HistoricoPrecoService historico) {
         if (repositorio == null || fonte == null) {
             throw new IllegalArgumentException("Repositório e fonte são obrigatórios.");
         }
         this.repositorio = repositorio;
         this.fonte = fonte;
+        this.historico = historico;
     }
 
     public List<Produto> importar(String nome) {
@@ -92,6 +99,10 @@ public class ImportacaoCatalogoService {
             } catch (IllegalArgumentException e) {
                 // dado inválido vindo de fora (ex.: preço zero): ignora só esta oferta
             }
+        }
+        // UC06: os preços acabaram de vir da fonte; grava os que mudaram
+        if (historico != null) {
+            historico.registrar(produto);
         }
     }
 }

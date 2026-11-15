@@ -377,3 +377,46 @@ body {
 }
 .sem-ofertas-nome { font-size: .95rem; }
 .sem-ofertas-link { color: var(--verde-escuro); font-size: .85rem; white-space: nowrap; }
+/* ---------- histórico de preços ---------- */
+.historico-precos {
+  margin: 24px 0 8px;
+  background: #fff;
+  border: 1px solid var(--borda);
+  border-radius: 12px;
+  padding: 4px 16px 12px;
+}
+.historico-resumo { margin: 0 0 12px; font-size: .9rem; }
+.historico-aviso { margin: 0 0 12px; font-size: .85rem; color: var(--apagado); }
+.grafico-legenda { list-style: none; display: flex; flex-wrap: wrap; gap: 6px 16px; margin: 0 0 8px; padding: 0; font-size: .85rem; }
+.grafico-legenda li { display: flex; align-items: center; gap: 6px; }
+.grafico-amostra { display: inline-block; width: 12px; height: 12px; border-radius: 3px; flex: none; }
+.grafico-area { position: relative; }
+.grafico-area svg { display: block; width: 100%; height: auto; touch-action: pan-y; }
+.grafico-grade { stroke: var(--borda); stroke-width: 1; }
+.grafico-rotulo { fill: var(--apagado); font-size: 12px; }
+.grafico-linha { fill: none; stroke-width: 2; stroke-linejoin: round; }
+.grafico-ponto { stroke: #fff; stroke-width: 2; }
+.grafico-guia { stroke: var(--apagado); stroke-width: 1; }
+.grafico-dica {
+  position: absolute;
+  top: 8px;
+  transform: translateX(12px);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background: #fff;
+  border: 1px solid var(--borda);
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: .8rem;
+  white-space: nowrap;
+  pointer-events: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, .08);
+}
+.grafico-dica.a-esquerda { transform: translateX(calc(-100% - 12px)); }
+.grafico-dica-linha { display: flex; align-items: center; gap: 6px; }
+.historico-tabela summary { cursor: pointer; font-size: .9rem; color: var(--verde-escuro); padding: 8px 0; }
+.historico-tabela table { width: 100%; border-collapse: collapse; font-size: .85rem; }
+.historico-tabela th, .historico-tabela td { text-align: left; padding: 6px 8px; border-top: 1px solid var(--borda); }
+.historico-tabela th { color: var(--apagado); font-weight: 600; }
+.historico-preco { font-variant-numeric: tabular-nums; }

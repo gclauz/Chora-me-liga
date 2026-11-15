@@ -974,6 +974,11 @@ function mostrarDetalhes(detalhes) {
   });
   desenhar();
   conteudoDetalhes.appendChild(lista);
+
+  const historico = criarHistoricoPrecos(detalhes);
+  if (historico) {
+    conteudoDetalhes.appendChild(historico);
+  }
 }
 
 // a ordem escolhida vale para os próximos produtos abertos (até recarregar a página)
@@ -1049,6 +1054,206 @@ function criarOferta(oferta, melhor, produto, opcoes = {}) {
     linha.appendChild(link);
   }
   return linha;
+}
+
+// ---------- histórico de preços (UC09) ----------
+
+// cores fixas por posição da loja (nunca recicladas); a loja mantém a cor enquanto o produto estiver aberto
+const CORES_HISTORICO = ["#2a78d6", "#eb6834", "#1baf7a", "#eda100", "#e87ba4", "#008300", "#6250d6", "#e34948"];
+const SVG_NS = "http://www.w3.org/2000/svg";
+const formatoMoedaCurto = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
+const formatoData = new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric" });
+const formatoDataCurta = new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "2-digit" });
+
+// O preço de cada loja vale a partir da data do ponto até o próximo ponto (ou até hoje),
+// por isso o gráfico é em degraus. Devolve null se o produto ainda não tem preços gravados.
+function criarHistoricoPrecos(detalhes) {
+  const series = (detalhes.historico || [])
+      .map((h) => ({
+        loja: h.loja,
+        pontos: h.pontos.map((p) => ({ data: new Date(p.data), preco: p.preco }))
+            .filter((p) => !isNaN(p.data.getTime()))
+      }))
+      .filter((s) => s.pontos.length > 0);
+  if (series.length === 0) {
+    return null;
+  }
+
+  const secao = criar("section", "historico-precos");
+  secao.appendChild(criar("h3", "titulo-secao", "Histórico de preços"));
+
+  const todos = series.flatMap((s) => s.pontos.map((p) => ({ ...p, loja: s.loja })));
+  const inicio = new Date(Math.min(...todos.map((p) => p.data.getTime())));
+  const menor = todos.reduce((a, b) => (b.preco < a.preco ? b : a));
+  secao.appendChild(criar("p", "historico-resumo",
+      "Menor preço registrado: " + formatoMoeda.format(menor.preco) + " (" + menor.loja +
+      ", " + formatoData.format(menor.data) + "). Acompanhamos este produto desde " +
+      formatoData.format(inicio) + "."));
+
+  // o gráfico só faz sentido quando há pelo menos um dia de diferença entre os registros
+  const fim = new Date();
+  const umDia = 24 * 60 * 60 * 1000;
+  if (fim.getTime() - inicio.getTime() >= umDia && todos.length > series.length) {
+    // no máximo 8 lojas no gráfico (as primeiras do histórico); a tabela mostra todas
+    secao.appendChild(criarGraficoHistorico(series.slice(0, CORES_HISTORICO.length), inicio, fim));
+    if (series.length > CORES_HISTORICO.length) {
+      secao.appendChild(criar("p", "historico-aviso",
+          "O gráfico mostra " + CORES_HISTORICO.length + " lojas; a tabela abaixo tem todas."));
+    }
+  } else {
+    secao.appendChild(criar("p", "historico-aviso",
+        "Ainda não houve mudança de preço. O gráfico aparece quando algum preço mudar em uma nova pesquisa."));
+  }
+
+  secao.appendChild(criarTabelaHistorico(todos));
+  return secao;
+}
+
+function criarGraficoHistorico(series, inicio, fim) {
+  // desenha na largura real da tela (menos o espaço interno do quadro), para o texto não encolher no celular
+  const largura = Math.max(280, Math.min(900, conteudoDetalhes.clientWidth - 34));
+  const altura = largura < 500 ? 200 : 240;
+  const margem = { topo: 12, direita: 16, baixo: 28, esquerda: 72 };
+  const areaL = largura - margem.esquerda - margem.direita;
+  const areaA = altura - margem.topo - margem.baixo;
+
+  const precos = series.flatMap((s) => s.pontos.map((p) => p.preco));
+  let minimo = Math.min(...precos);
+  let maximo = Math.max(...precos);
+  const folga = (maximo - minimo) * 0.1 || maximo * 0.05;
+  minimo = Math.max(0, minimo - folga);
+  maximo += folga;
+
+  const t0 = inicio.getTime();
+  const t1 = fim.getTime();
+  const x = (data) => margem.esquerda + ((data.getTime() - t0) / (t1 - t0)) * areaL;
+  const y = (preco) => margem.topo + (1 - (preco - minimo) / (maximo - minimo)) * areaA;
+
+  const caixa = criar("div", "grafico-historico");
+
+  const legenda = criar("ul", "grafico-legenda");
+  series.forEach((s, i) => {
+    const item = criar("li", "");
+    const amostra = criar("span", "grafico-amostra");
+    amostra.style.background = CORES_HISTORICO[i];
+    item.appendChild(amostra);
+    item.appendChild(document.createTextNode(s.loja));
+    legenda.appendChild(item);
+  });
+  caixa.appendChild(legenda);
+
+  const svg = elementoSvg("svg", { viewBox: "0 0 " + largura + " " + altura, role: "img",
+    "aria-label": "Gráfico do histórico de preços por loja" });
+
+  // grade e eixo do preço: 4 linhas horizontais
+  for (let i = 0; i <= 3; i++) {
+    const valor = minimo + ((maximo - minimo) * i) / 3;
+    const yy = y(valor);
+    svg.appendChild(elementoSvg("line", { x1: margem.esquerda, x2: largura - margem.direita, y1: yy, y2: yy,
+      class: "grafico-grade" }));
+    const rotulo = elementoSvg("text", { x: margem.esquerda - 8, y: yy + 4, "text-anchor": "end", class: "grafico-rotulo" });
+    rotulo.textContent = formatoMoedaCurto.format(valor);
+    svg.appendChild(rotulo);
+  }
+  // eixo das datas: início, meio e hoje
+  [[inicio, "start"], [new Date((t0 + t1) / 2), "middle"], [fim, "end"]].forEach(([data, ancora]) => {
+    const rotulo = elementoSvg("text", { x: x(data), y: altura - 8, "text-anchor": ancora, class: "grafico-rotulo" });
+    rotulo.textContent = data === fim ? "hoje" : formatoDataCurta.format(data);
+    svg.appendChild(rotulo);
+  });
+
+  // uma linha em degraus por loja, que segue até hoje com o último preço
+  series.forEach((s, i) => {
+    // começa no primeiro preço; a cada mudança, anda na horizontal até a data e sobe/desce até o novo preço
+    const caminho = s.pontos
+        .map((p, j) => (j === 0 ? "M" + x(p.data) + " " + y(p.preco) : "H" + x(p.data) + " V" + y(p.preco)))
+        .join(" ") + " H" + x(fim);
+    svg.appendChild(elementoSvg("path", { d: caminho, class: "grafico-linha", stroke: CORES_HISTORICO[i] }));
+    s.pontos.forEach((p) => {
+      svg.appendChild(elementoSvg("circle", { cx: x(p.data), cy: y(p.preco), r: 4, fill: CORES_HISTORICO[i],
+        class: "grafico-ponto" }));
+    });
+  });
+
+  // passar o mouse (ou o dedo): linha vertical e o preço de cada loja naquele dia
+  const guia = elementoSvg("line", { y1: margem.topo, y2: margem.topo + areaA, class: "grafico-guia", visibility: "hidden" });
+  svg.appendChild(guia);
+  const dica = criar("div", "grafico-dica");
+  dica.hidden = true;
+
+  const mostrarDica = (evento) => {
+    const limites = svg.getBoundingClientRect();
+    const xx = ((evento.clientX - limites.left) / limites.width) * largura;
+    if (xx < margem.esquerda || xx > largura - margem.direita) {
+      esconderDica();
+      return;
+    }
+    const data = new Date(t0 + ((xx - margem.esquerda) / areaL) * (t1 - t0));
+    guia.setAttribute("x1", xx);
+    guia.setAttribute("x2", xx);
+    guia.setAttribute("visibility", "visible");
+
+    limpar(dica);
+    dica.appendChild(criar("strong", "", formatoData.format(data)));
+    series.forEach((s, i) => {
+      const valendo = s.pontos.filter((p) => p.data <= data).pop();
+      if (!valendo) {
+        return; // a loja ainda não tinha preço registrado nesse dia
+      }
+      const linha = criar("span", "grafico-dica-linha");
+      const amostra = criar("span", "grafico-amostra");
+      amostra.style.background = CORES_HISTORICO[i];
+      linha.appendChild(amostra);
+      linha.appendChild(document.createTextNode(s.loja + ": " + formatoMoeda.format(valendo.preco)));
+      dica.appendChild(linha);
+    });
+    dica.hidden = false;
+    const posicao = ((xx / largura) * 100);
+    dica.style.left = posicao + "%";
+    dica.classList.toggle("a-esquerda", posicao > 60);
+  };
+  const esconderDica = () => {
+    guia.setAttribute("visibility", "hidden");
+    dica.hidden = true;
+  };
+  svg.addEventListener("pointermove", mostrarDica);
+  svg.addEventListener("pointerdown", mostrarDica);
+  svg.addEventListener("pointerleave", esconderDica);
+
+  const area = criar("div", "grafico-area");
+  area.appendChild(svg);
+  area.appendChild(dica);
+  caixa.appendChild(area);
+  return caixa;
+}
+
+// a mesma informação em texto, do registro mais recente para o mais antigo
+function criarTabelaHistorico(todos) {
+  const caixa = criar("details", "historico-tabela");
+  caixa.appendChild(criar("summary", "", "Ver todos os preços registrados (" + todos.length + ")"));
+  const tabela = criar("table", "");
+  const cabecalho = criar("tr", "");
+  ["Data", "Loja", "Preço"].forEach((titulo) => cabecalho.appendChild(criar("th", "", titulo)));
+  const thead = criar("thead", "");
+  thead.appendChild(cabecalho);
+  tabela.appendChild(thead);
+  const corpo = criar("tbody", "");
+  [...todos].sort((a, b) => b.data - a.data).forEach((p) => {
+    const linha = criar("tr", "");
+    linha.appendChild(criar("td", "", formatoData.format(p.data)));
+    linha.appendChild(criar("td", "", p.loja));
+    linha.appendChild(criar("td", "historico-preco", formatoMoeda.format(p.preco)));
+    corpo.appendChild(linha);
+  });
+  tabela.appendChild(corpo);
+  caixa.appendChild(tabela);
+  return caixa;
+}
+
+function elementoSvg(tag, atributos) {
+  const elemento = document.createElementNS(SVG_NS, tag);
+  Object.entries(atributos).forEach(([nome, valor]) => elemento.setAttribute(nome, valor));
+  return elemento;
 }
 
 // ---------- utilitários ----------

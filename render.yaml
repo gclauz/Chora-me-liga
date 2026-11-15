@@ -1,0 +1,23 @@
+# Configuração do Render (Blueprint). Os valores secretos (sync: false) são pedidos no painel
+# do Render na primeira vez e nunca ficam no GitHub.
+services:
+  - type: web
+    name: chora-me-liga
+    runtime: docker
+    plan: free
+    branch: main
+    healthCheckPath: /
+    envVars:
+      # PostgreSQL do Neon, no formato jdbc:postgresql://HOST/BANCO?sslmode=require
+      - key: SPRING_DATASOURCE_URL
+        sync: false
+      - key: SPRING_DATASOURCE_USERNAME
+        sync: false
+      - key: SPRING_DATASOURCE_PASSWORD
+        sync: false
+      - key: ML_CLIENT_ID
+        sync: false
+      - key: ML_CLIENT_SECRET
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
