@@ -69,7 +69,6 @@ O sistema adota uma arquitetura em camadas, em `Codigos/br/mackenzie/chorameliga
 | `historico` | Histórico de preços gravado no banco de dados (`HistoricoPrecos`) |
 | `dto` | Dados prontos para a tela (`ProdutoResumo`, `DetalhesProduto`, `OfertaDetalhe`) |
 | `catalogo` | Origem dos produtos e ofertas (`FonteCatalogo`): Mercado Livre ou dados simulados |
-| `fonte` | Origem da atualização de preços (`FontePrecos`) |
 | `reconhecimento` | Reconhecimento de produto por foto (`ReconhecedorFoto`): com o Gemini (`GeminiReconhecedor`) ou simulado; e validação do formato da imagem |
 | `config` | Configuração dos componentes do Spring |
 
@@ -226,7 +225,7 @@ No plano gratuito, o Render desliga o sistema depois de 15 minutos sem acesso; o
 
 ## Testes
 
-Os testes automatizados ficam em [`CodigosTest/`](CodigosTest): são 165 testes (JUnit 5) em 23 classes. Para rodar:
+Os testes automatizados ficam em [`CodigosTest/`](CodigosTest): são 155 testes (JUnit 5) em 21 classes. Para rodar:
 
 ```bash
 mvn clean test

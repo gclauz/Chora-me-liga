@@ -1,8 +1,8 @@
 # Casos de teste: Chora-me-liga
 
-Versão para leitura no GitHub. O documento completo, com o catálogo dos 165 testes, está em [`casos-de-teste.docx`](casos-de-teste.docx).
+Versão para leitura no GitHub. O documento completo, com o catálogo dos 155 testes, está em [`casos-de-teste.docx`](casos-de-teste.docx).
 
-**Execução de 24/11/2026:** 165 testes automatizados, 165 passaram, 0 falharam (23 classes de teste em [`CodigosTest/`](../CodigosTest)).
+**Execução de 24/11/2026:** 155 testes automatizados, 155 passaram, 0 falharam (21 classes de teste em [`CodigosTest/`](../CodigosTest)).
 
 Os testes rodam com `mvn clean test` e na esteira do GitHub Actions (`.github/workflows/ci.yml`) a cada push e pull request. Não dependem de internet nem de chaves: o Mercado Livre e o Gemini são simulados, e o histórico usa um banco H2 em memória.
 
@@ -62,9 +62,9 @@ Os testes rodam com `mvn clean test` e na esteira do GitHub Actions (`.github/wo
 
 | ID | Caso | Entrada / passos | Resultado esperado | Testes | Resultado |
 |---|---|---|---|---|---|
-| CT-26 | Preço novo atualiza a oferta e guarda o antigo | Nova pesquisa em que a loja tem preço diferente. | A oferta recebe o preço novo, sem ser duplicada, e o preço antigo fica no histórico. | `ImportacaoCatalogoServiceTest.testAtualizaPrecoNaSegundaImportacao`<br>`AtualizacaoPrecosTest.testAtualizaEGuardaHistorico`<br>`ProdutoTest.testAplicarPrecoLojaExistente`<br>`OfertaTest.testAtualizarPreco` | Passou |
-| CT-27 | Preço igual não altera nada | Nova pesquisa com os mesmos preços. | Nem a oferta nem o histórico mudam. | `AtualizacaoPrecosTest.testPrecoIgualNaoAltera`<br>`HistoricoPrecoServiceTest.testPrecoIgualNaoRepete` | Passou |
-| CT-28 | Loja nova e dado inválido | Aplicar os preços. | A loja nova ganha uma oferta; a oferta inválida é ignorada e as demais são aplicadas. | `AtualizacaoPrecosTest.testCriaOfertasNovas`<br>`AtualizacaoPrecosTest.testDadoInvalidoNaoInterrompe`<br>`ImportacaoCatalogoServiceTest.testOfertaInvalidaNaoInterrompe`<br>`ImportacaoCatalogoServiceTest.testFonteComErroNasOfertas` | Passou |
+| CT-26 | Preço novo atualiza a oferta e guarda o antigo | Nova pesquisa em que a loja tem preço diferente. | A oferta recebe o preço novo, sem ser duplicada, e o preço antigo fica no histórico. | `ImportacaoCatalogoServiceTest.testAtualizaPrecoNaSegundaImportacao`<br>`ProdutoTest.testAplicarPrecoLojaExistente`<br>`OfertaTest.testAtualizarPreco` | Passou |
+| CT-27 | Preço igual não altera nada | Nova pesquisa com os mesmos preços. | Nem a oferta nem o histórico mudam. | `HistoricoPrecoServiceTest.testPrecoIgualNaoRepete` | Passou |
+| CT-28 | Loja nova e dado inválido | Aplicar os preços. | A loja nova ganha uma oferta; a oferta inválida é ignorada e as demais são aplicadas. | `ImportacaoCatalogoServiceTest.testOfertaInvalidaNaoInterrompe`<br>`ImportacaoCatalogoServiceTest.testFonteComErroNasOfertas` | Passou |
 
 ### REQ-07 / UC07: Filtros na busca (categoria)
 
@@ -97,7 +97,7 @@ Os testes rodam com `mvn clean test` e na esteira do GitHub Actions (`.github/wo
 | CTM-07 | REQ-08 | Favoritos | Clicar na estrela (☆) de um produto e de uma oferta de uma loja; abrir Favoritos no menu; buscar pelo nome da loja; filtrar Só ofertas; recarregar a página; remover dos favoritos. | Os itens aparecem em Meus favoritos, a busca e os filtros funcionam, os favoritos continuam após recarregar e somem ao remover. |
 | CTM-08 | REQ-09 | Histórico de preços na tela | Abrir os detalhes de um produto pesquisado em dias diferentes; passar o mouse no gráfico; abrir a tabela de registros. | Mostra o menor preço registrado, o gráfico com uma linha por loja, o preço de cada loja no ponto do mouse e a tabela com todos os registros. |
 | CTM-09 | Extra | Pesquisa por voz | No Chrome ou Edge, clicar no microfone, permitir o acesso e falar "Galaxy S23". | O texto falado aparece no campo e a pesquisa é feita automaticamente. |
-| CTM-10 | REQ-11 | Esteira de testes (CI) | Fazer push numa branch ou abrir um pull request; abrir a aba Actions do GitHub. | O workflow CI roda "mvn clean test" com Java 17 e termina verde, com 165 testes e 0 falhas. |
+| CTM-10 | REQ-11 | Esteira de testes (CI) | Fazer push numa branch ou abrir um pull request; abrir a aba Actions do GitHub. | O workflow CI roda "mvn clean test" com Java 17 e termina verde, com 155 testes e 0 falhas. |
 | CTM-11 | REQ-12 | Sistema na nuvem | Abrir https://chora-me-liga.onrender.com e fazer uma pesquisa. | O site abre em HTTPS (o primeiro acesso pode levar cerca de 1 minuto) e a pesquisa traz produtos do Mercado Livre. |
 
 ## Classes de teste
@@ -111,7 +111,6 @@ Os testes rodam com `mvn clean test` e na esteira do GitHub Actions (`.github/wo
 | [`PesquisaFotoControllerTest`](../CodigosTest/br/mackenzie/chorameliga/controller/PesquisaFotoControllerTest.java) | API REST (Spring MockMvc) | 4 |
 | [`ProdutoControllerDominioTest`](../CodigosTest/br/mackenzie/chorameliga/controller/ProdutoControllerDominioTest.java) | API REST (Spring MockMvc) | 3 |
 | [`ProdutoControllerTest`](../CodigosTest/br/mackenzie/chorameliga/controller/ProdutoControllerTest.java) | API REST (Spring MockMvc) | 9 |
-| [`FontePrecosFakeTest`](../CodigosTest/br/mackenzie/chorameliga/fonte/FontePrecosFakeTest.java) | Unidade (fonte de preços simulada) | 4 |
 | [`HistoricoPrecosJdbcTest`](../CodigosTest/br/mackenzie/chorameliga/historico/HistoricoPrecosJdbcTest.java) | Integração com banco de dados (H2 em memória) | 3 |
 | [`OfertaTest`](../CodigosTest/br/mackenzie/chorameliga/model/OfertaTest.java) | Unidade (regras de negócio) | 7 |
 | [`ProdutoTest`](../CodigosTest/br/mackenzie/chorameliga/model/ProdutoTest.java) | Unidade (regras de negócio) | 9 |
@@ -119,7 +118,6 @@ Os testes rodam com `mvn clean test` e na esteira do GitHub Actions (`.github/wo
 | [`GeminiReconhecedorTest`](../CodigosTest/br/mackenzie/chorameliga/reconhecimento/GeminiReconhecedorTest.java) | Integração com o Gemini (HTTP simulado) | 18 |
 | [`ReconhecedorFotoFakeTest`](../CodigosTest/br/mackenzie/chorameliga/reconhecimento/ReconhecedorFotoFakeTest.java) | Integração com o Gemini (HTTP simulado) | 4 |
 | [`ProdutoRepositoryTest`](../CodigosTest/br/mackenzie/chorameliga/repository/ProdutoRepositoryTest.java) | Unidade (armazenamento) | 10 |
-| [`AtualizacaoPrecosTest`](../CodigosTest/br/mackenzie/chorameliga/service/AtualizacaoPrecosTest.java) | Serviço (casos de uso, com dublês) | 6 |
 | [`FiltroPorDominioTest`](../CodigosTest/br/mackenzie/chorameliga/service/FiltroPorDominioTest.java) | Serviço (casos de uso, com dublês) | 6 |
 | [`HistoricoNosDetalhesTest`](../CodigosTest/br/mackenzie/chorameliga/service/HistoricoNosDetalhesTest.java) | Serviço (casos de uso, com dublês) | 4 |
 | [`HistoricoPrecoServiceTest`](../CodigosTest/br/mackenzie/chorameliga/service/HistoricoPrecoServiceTest.java) | Serviço (casos de uso, com dublês) | 7 |
@@ -127,4 +125,4 @@ Os testes rodam com `mvn clean test` e na esteira do GitHub Actions (`.github/wo
 | [`PesquisaPorFotoServiceTest`](../CodigosTest/br/mackenzie/chorameliga/service/PesquisaPorFotoServiceTest.java) | Serviço (casos de uso, com dublês) | 8 |
 | [`ProdutoServicePesquisaTest`](../CodigosTest/br/mackenzie/chorameliga/service/ProdutoServicePesquisaTest.java) | Serviço (casos de uso, com dublês) | 10 |
 | [`ProdutoServiceTest`](../CodigosTest/br/mackenzie/chorameliga/service/ProdutoServiceTest.java) | Serviço (casos de uso, com dublês) | 6 |
-| **Total** | | **165** |
+| **Total** | | **155** |
