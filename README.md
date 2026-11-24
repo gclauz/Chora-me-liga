@@ -98,15 +98,42 @@ Os testes ficam em `CodigosTest/`, espelhando a mesma estrutura.
 - API do Gemini (Google), para reconhecer produtos em fotos
 - GitHub Actions
 
-## Como rodar
+## Documentação
 
-Na raiz do projeto:
+| Documento | Conteúdo |
+|---|---|
+| [`Documentacao/Projeto Parte1.pdf`](Documentacao/Projeto%20Parte1.pdf) | Documento do projeto: requisitos, casos de uso e diagramas |
+| [`Documentacao/casos-de-teste.md`](Documentacao/casos-de-teste.md) | Casos de teste, para ler no GitHub |
+| [`Documentacao/casos-de-teste.docx`](Documentacao/casos-de-teste.docx) | Casos de teste completos, com o catálogo de todos os testes automatizados |
 
-```bash
-mvn spring-boot:run
-```
+## Manual de instalação
 
-Depois abra http://localhost:8080.
+### Pré-requisitos
+
+- [Git](https://git-scm.com)
+- [Java 17](https://adoptium.net) (JDK)
+- [Maven 3.9](https://maven.apache.org/download.cgi) ou mais novo
+
+Para conferir se estão instalados: `git --version`, `java -version` e `mvn -version`.
+
+### Passo a passo
+
+1. Baixe o projeto:
+
+   ```bash
+   git clone https://github.com/gclauz/Chora-me-liga.git
+   cd Chora-me-liga
+   ```
+
+2. Rode o sistema:
+
+   ```bash
+   mvn spring-boot:run
+   ```
+
+3. Abra http://localhost:8080 no navegador.
+
+Para parar o sistema, aperte `Ctrl + C` no terminal.
 
 O histórico de preços fica num banco H2 na pasta `dados/` (criada na primeira execução e fora do GitHub). Para começar o histórico do zero, apague essa pasta com o sistema parado.
 
@@ -139,6 +166,51 @@ As chaves nunca devem ir para o código nem para o GitHub. As fotos da pesquisa 
 
 A pesquisa por voz precisa de Chrome ou Edge, de acesso ao microfone e de internet, e só funciona em `localhost` ou em HTTPS.
 
+## Manual de utilização
+
+Abra https://chora-me-liga.onrender.com (ou http://localhost:8080, se estiver rodando no seu computador).
+
+### Pesquisar um produto
+
+- **Pelo nome:** digite o nome no campo de pesquisa (ex.: "Galaxy S23") e clique em **Pesquisar**.
+- **Por categoria:** clique numa das **Categorias populares** da tela inicial (Smartphones, Notebooks, Smart TVs, Games & Consoles).
+- **Por voz:** clique no microfone ao lado do campo, permita o acesso ao microfone e fale o nome do produto. A pesquisa é feita sozinha. Funciona no Chrome e no Edge.
+- **Por foto:** clique em **Pesquisar por foto**, depois em **Carregar imagem**, e escolha uma foto do produto (JPG, PNG ou WEBP, até 5 MB). O sistema mostra o nome reconhecido e os produtos encontrados. Se não identificar o produto, avisa para tentar outra foto.
+
+### Ver e filtrar os resultados
+
+Cada produto mostra o menor preço encontrado e quantas ofertas tem.
+
+- **Ordenar:** Relevância, Menor preço, Maior preço ou Mais ofertas.
+- **Faixa de preço:** preencha os campos **mín.** e **máx.**
+- **Limpar filtros:** volta à lista original.
+
+Para ver só uma categoria, pesquise pelos botões das **Categorias populares** da tela inicial.
+
+### Comparar os preços de um produto
+
+Clique num produto para abrir os detalhes.
+
+- **Ofertas:** a lista mostra cada loja com preço, frete e parcelamento. O campo **Ordenar ofertas por** organiza por preço, frete ou loja. Clique numa oferta para abrir a página da loja.
+- **Histórico de preços:** mostra o menor preço já registrado e um gráfico com o preço de cada loja ao longo do tempo. Passe o mouse no gráfico para ver o preço de cada loja naquele dia. Abaixo do gráfico fica a tabela com todos os registros. O gráfico aparece depois que o produto é pesquisado em dias diferentes e algum preço muda.
+
+### Pesquisas recentes
+
+As 10 últimas pesquisas aparecem na tela inicial, em **Pesquisas recentes**.
+
+- Clique numa pesquisa para refazê-la.
+- Use o **×** para remover uma pesquisa, ou **Limpar histórico** para apagar todas.
+
+Elas ficam salvas no navegador, sem precisar de login.
+
+### Favoritos
+
+- Clique na estrela de um produto (ou de uma oferta de uma loja) para favoritar.
+- Abra **Favoritos** no menu para ver tudo o que foi salvo. Dá para buscar por produto ou loja, mostrar **Só produtos** ou **Só ofertas**, filtrar por categoria e ordenar.
+- Clique de novo na estrela para remover.
+
+Os favoritos ficam salvos no navegador, sem precisar de login.
+
 ## Publicar na nuvem
 
 O sistema roda no [Render](https://render.com) e guarda o histórico de preços no [Neon](https://neon.tech), ambos gratuitos e sem cartão. A tabela do histórico é criada sozinha na primeira vez que o sistema sobe.
@@ -152,11 +224,23 @@ O sistema roda no [Render](https://render.com) e guarda o histórico de preços 
 
 No plano gratuito, o Render desliga o sistema depois de 15 minutos sem acesso; o primeiro acesso depois disso demora cerca de um minuto. O histórico não se perde, porque fica no Neon.
 
-## Como rodar os testes
+## Testes
+
+Os testes automatizados ficam em [`CodigosTest/`](CodigosTest): são 165 testes (JUnit 5) em 23 classes. Para rodar:
 
 ```bash
 mvn clean test
 ```
+
+Os testes não precisam de internet nem de chaves:
+
+- o Mercado Livre e o Gemini são simulados;
+- a API é testada com o Spring MockMvc;
+- o histórico de preços usa um banco H2 em memória.
+
+**Esteira (CI/CD):** a cada push e pull request, o GitHub Actions ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) roda `mvn clean test` com Java 17. O resultado aparece na aba **Actions** do repositório. O que entra na `main` é publicado automaticamente no Render.
+
+Os casos de teste estão em [`Documentacao/casos-de-teste.md`](Documentacao/casos-de-teste.md) e, completos, em [`Documentacao/casos-de-teste.docx`](Documentacao/casos-de-teste.docx).
 
 ## Uso de inteligência artificial
 
